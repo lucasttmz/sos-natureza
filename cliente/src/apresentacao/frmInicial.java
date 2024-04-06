@@ -64,7 +64,6 @@ public class frmInicial extends JFrame {
         gbc = new GridBagConstraints();
         gbc.insets = new Insets(15, 0, 15, 0);
         gbc.fill = GridBagConstraints.BOTH;
-        
         pnlPrincipal.setPreferredSize(new Dimension(400, 450));
         pnlPrincipal.setLayout(layout);
 
@@ -73,6 +72,10 @@ public class frmInicial extends JFrame {
         posicionarComponente(lblNome, 1, 0, 1, 1);
         posicionarComponente(txfNome, 2, 0, 1, 1);
         posicionarComponente(btnEntrar, 3, 0, 1, 1);
+        
+//        gbc.weightx = 0.0;
+//        gbc.weighty = 1.0;
+//        posicionarComponente(new JLabel(""), 4, 0, 1, 1);
         
         this.add(pnlPrincipal);
 

@@ -11,6 +11,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
@@ -72,13 +73,16 @@ public class frmChat extends JFrame {
         posicionarComponente(layoutPrincipal, pnlPrincipal, pnlChat, 0, 1, 1, 1);
         
         gbc.fill = GridBagConstraints.BOTH;
-        
+
         // Logo
         JLabel lblLogo = new JLabel("SOS Natureza");
         lblLogo.setHorizontalAlignment(SwingConstants.CENTER);
         lblLogo.setHorizontalTextPosition(SwingConstants.CENTER);
         lblLogo.setVerticalTextPosition(SwingConstants.BOTTOM);
         lblLogo.setFont(new Font("Arial", Font.BOLD, 30));
+        gbc.insets.top = 20;
+        gbc.insets.bottom = 20;
+        
         posicionarComponente(layoutLateral, pnlLateral, lblLogo, 0, 0, 1, 1);
         
         // Geral
@@ -87,16 +91,46 @@ public class frmChat extends JFrame {
         lblGeral.setHorizontalTextPosition(SwingConstants.CENTER);
         lblGeral.setVerticalTextPosition(SwingConstants.BOTTOM);
         lblGeral.setFont(new Font("Arial", Font.BOLD, 16));
+        
+        gbc.insets.top = 0;
+        gbc.insets.bottom = 5;
         posicionarComponente(layoutLateral, pnlLateral, lblGeral, 1, 0, 1, 1);
         
-        // Geral
+        // topico1
         JLabel lblTopico = new JLabel("#topico1");
         lblTopico.setHorizontalAlignment(SwingConstants.CENTER);
         lblTopico.setHorizontalTextPosition(SwingConstants.CENTER);
         lblTopico.setVerticalTextPosition(SwingConstants.BOTTOM);
         lblTopico.setFont(new Font("Arial", Font.BOLD, 16));
-        
         posicionarComponente(layoutLateral, pnlLateral, lblTopico, 2, 0, 1, 1);
+        
+        // SEPARADOR
+        JSeparator separador = new JSeparator();
+        gbc.insets.top = 15;
+        gbc.insets.bottom = 15;
+        posicionarComponente(layoutLateral, pnlLateral, separador, 11, 0, 1, 1);
+        gbc.insets.top = 0;
+        gbc.insets.bottom = 0;
+        
+        // Criar tópico
+        JButton btnCriarTopico = new JButton("Criar Novo Tópico");
+        btnCriarTopico.addActionListener((e) -> {
+            
+            frmNovoTopico frmNT = new frmNovoTopico();
+            frmNT.setVisible(true);
+        });
+        btnCriarTopico.setPreferredSize(new Dimension(135, 25));
+        btnCriarTopico.setHorizontalAlignment(SwingConstants.LEFT);
+        btnCriarTopico.setHorizontalTextPosition(SwingConstants.LEFT);
+        gbc.fill = GridBagConstraints.NONE;
+        posicionarComponente(layoutLateral, pnlLateral, btnCriarTopico, 12, 0, 1, 1);
+        
+        // ULTIMO PARA NAO BUGAR TUDO
+        gbc.weightx = 0.0;
+        gbc.weighty = 1.0;
+        posicionarComponente(layoutLateral, pnlLateral, new JLabel(""), 13, 0, 1, 1);
+        gbc.weightx = 1;
+        gbc.weighty = 1;
         
         // Painel Mensagens
         pnlMensagens = new JPanel();
