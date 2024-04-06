@@ -16,9 +16,7 @@ import javax.swing.SwingConstants;
 
 public class frmInicial extends JFrame {
 
-    private JPanel pnlPrincipal;
-    private GridBagConstraints gbc;
-    private GridBagLayout layout;
+    private Layout layout;
 
     public frmInicial() {
         this.setTitle("SOS Natureza");
@@ -26,7 +24,8 @@ public class frmInicial extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         this.setResizable(false);
-        iniciarComponentes();
+
+        this.iniciarComponentes();
     }
 
     public void iniciarComponentes() {
@@ -36,58 +35,38 @@ public class frmInicial extends JFrame {
         lblTitulo.setHorizontalTextPosition(SwingConstants.CENTER);
         lblTitulo.setVerticalTextPosition(SwingConstants.BOTTOM);
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 30));
-        
+
         // Nome exibição
         JLabel lblNome = new JLabel("Nome de exibição");
         lblNome.setHorizontalAlignment(SwingConstants.CENTER);
         lblNome.setHorizontalTextPosition(SwingConstants.CENTER);
         lblNome.setVerticalTextPosition(SwingConstants.BOTTOM);
         lblNome.setFont(new Font("Arial", Font.BOLD, 16));
-        
-        // Nome
         JTextField txfNome = new JTextField();
         txfNome.setHorizontalAlignment(SwingConstants.CENTER);
-        
+
         // Entrar
         JButton btnEntrar = new JButton("Entrar");
-        
         btnEntrar.addActionListener((e) -> {
             // Validar nome
             frmChat frmC = new frmChat(txfNome.getText());
             frmC.setVisible(true);
             this.dispose();
         });
-        
+
         // Layout
-        pnlPrincipal = new JPanel();
-        layout = new GridBagLayout();
-        gbc = new GridBagConstraints();
-        gbc.insets = new Insets(15, 0, 15, 0);
-        gbc.fill = GridBagConstraints.BOTH;
+        JPanel pnlPrincipal = new JPanel();
         pnlPrincipal.setPreferredSize(new Dimension(400, 450));
-        pnlPrincipal.setLayout(layout);
+        Insets margemLogo = new Insets(15, 0, 15, 0);
+        Insets margemCampos = new Insets(3, 0, 3, 0);
 
-        posicionarComponente(lblTitulo, 0, 0, 1, 1);
-        gbc.insets = new Insets(3, 0, 3, 0);
-        posicionarComponente(lblNome, 1, 0, 1, 1);
-        posicionarComponente(txfNome, 2, 0, 1, 1);
-        posicionarComponente(btnEntrar, 3, 0, 1, 1);
-        
-//        gbc.weightx = 0.0;
-//        gbc.weighty = 1.0;
-//        posicionarComponente(new JLabel(""), 4, 0, 1, 1);
-        
+        layout = new Layout(pnlPrincipal);
+        layout.preencherHorizontalmente(true);
+        layout.posicionarComponente(lblTitulo, 0, 0, margemLogo);
+        layout.posicionarComponente(lblNome, 1, 0, margemCampos);
+        layout.posicionarComponente(txfNome, 2, 0, margemCampos);
+        layout.posicionarComponente(btnEntrar, 3, 0, margemCampos);
+
         this.add(pnlPrincipal);
-
     }
-    
-    private void posicionarComponente(Component c, int linha, int coluna, int largura, int altura) {
-        gbc.gridy = linha;
-        gbc.gridx = coluna;
-        gbc.gridheight = altura;
-        gbc.gridwidth = largura;
-        layout.setConstraints(c, gbc);
-        pnlPrincipal.add(c);
-    }
-
 }
