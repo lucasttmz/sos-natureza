@@ -1,5 +1,6 @@
 package apresentacao;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
@@ -12,7 +13,6 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import modelo.Controle;
-import modelo.Validacao;
 
 public class frmInicial extends JFrame {
     
@@ -48,7 +48,7 @@ public class frmInicial extends JFrame {
         lblNome.setFont(new Font("Arial", Font.BOLD, 16));
         txfNome = new JTextField();
         txfNome.setHorizontalAlignment(SwingConstants.CENTER);
-
+        
         // Endereço de IP
         JLabel lblIP = new JLabel("Endereço de IP");
         lblIP.setHorizontalAlignment(SwingConstants.CENTER);
@@ -68,6 +68,10 @@ public class frmInicial extends JFrame {
         txfPorta.setText("12345");
         txfPorta.setPreferredSize(new Dimension(100, 25));
         txfPorta.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        // Separador
+        JSeparator separador = new JSeparator();
+        separador.setForeground(Color.LIGHT_GRAY);
 
         // Entrar
         JButton btnEntrar = new JButton("Entrar");
@@ -86,7 +90,7 @@ public class frmInicial extends JFrame {
         layout.posicionarComponente(lblPorta, 1, 1, 1, 1, margemCampos);
         layout.posicionarComponente(txfIP, 2, 0, 1, 1, margemCampos);
         layout.posicionarComponente(txfPorta, 2, 1, 1, 1, margemCampos);
-        layout.posicionarComponente(new JSeparator(), 3, 0, 2, 1, margemGrande);
+        layout.posicionarComponente(separador, 3, 0, 2, 1, margemGrande);
         layout.posicionarComponente(lblNome, 4, 0, 2, 1, margemCampos);
         layout.posicionarComponente(txfNome, 5, 0, 2, 1, margemCampos);
         layout.posicionarComponente(btnEntrar, 6, 0, 2, 1, margemGrande);

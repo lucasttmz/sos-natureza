@@ -9,9 +9,9 @@ import javax.swing.JPanel;
 
 public class Layout {
 
-    private GridBagLayout layout;
-    private GridBagConstraints gbc;
-    private JPanel painel;
+    private final GridBagLayout layout;
+    private final GridBagConstraints gbc;
+    private final JPanel painel;
 
     public Layout(JPanel painel) {
         this.painel = painel;

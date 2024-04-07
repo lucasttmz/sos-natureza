@@ -86,7 +86,6 @@ public class frmNovoTopico extends JDialog {
     private void criarTopico() {
         Controle controle = new Controle();
         String hashtag = controle.criarNovoTopico(List.of(txfNome.getText(), txaDesc.getText(), txfFoto.getText()));
-        System.out.println(hashtag);
         this.dispose();
     }
 }
