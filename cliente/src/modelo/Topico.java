@@ -20,6 +20,11 @@ public class Topico {
         this.caminhoFoto = caminhoFoto;
         this.mensagens = new ArrayList<>();
     }
+    
+    public String getHashtag() {
+        String slug = this.nome.toLowerCase().replaceAll(" ", "-");
+        return "#" + slug;
+    }
 
     public Integer getId() {
         return id;
