@@ -11,15 +11,22 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 
 public class frmChat extends JFrame {
 
     private final String nomeExibicao;
     private final List<JLabel> topicos;
+
+    private JTextField txfEntrada;
+    private JButton btnEmoji;
 
     private JPanel pnlPrincipal;
     private JPanel pnlLateral;
@@ -105,16 +112,27 @@ public class frmChat extends JFrame {
     private void configurarPainelEntrada() {
         pnlEntrada = new JPanel();
         pnlEntrada.setBorder(BorderFactory.createEtchedBorder());
-        pnlEntrada.setMinimumSize(new Dimension(1092, 38));
-        pnlEntrada.setPreferredSize(new Dimension(1092, 38));
+        pnlEntrada.setMinimumSize(new Dimension(1092, 43));
+        pnlEntrada.setPreferredSize(new Dimension(1092, 43));
 
-        // Entrada e envio
-        JTextField txfEntrada = new JTextField();
-        txfEntrada.setPreferredSize(new Dimension(1000, 25));
+        // Entrada
+        txfEntrada = new JTextField();
+        // TODO: Encontrar uma fonte melhor
+        txfEntrada.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
+        txfEntrada.setPreferredSize(new Dimension(905, 30));
+
+        // Emoji
+        btnEmoji = new JButton("🌳");
+        btnEmoji.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 12));
+        btnEmoji.setPreferredSize(new Dimension(75, 30));
+        btnEmoji.addActionListener((e) -> mostrarListaEmojis());
+
+        // Enviar
         JButton btnEnviar = new JButton("Enviar");
-        btnEnviar.setPreferredSize(new Dimension(75, 25));
+        btnEnviar.setPreferredSize(new Dimension(75, 30));
 
         pnlEntrada.add(txfEntrada);
+        pnlEntrada.add(btnEmoji);
         pnlEntrada.add(btnEnviar);
 
     }
@@ -122,8 +140,8 @@ public class frmChat extends JFrame {
     private void configurarPainelMensagens() {
         pnlMensagens = new JPanel();
         pnlMensagens.setBorder(BorderFactory.createEtchedBorder());
-        pnlMensagens.setMinimumSize(new Dimension(1092, 680));
-        pnlMensagens.setPreferredSize(new Dimension(1092, 680));
+        pnlMensagens.setMinimumSize(new Dimension(1092, 675));
+        pnlMensagens.setPreferredSize(new Dimension(1092, 675));
         layoutMensagens = new Layout(pnlMensagens);
         layoutMensagens.preencherHorizontalmente(true);
 
@@ -145,6 +163,34 @@ public class frmChat extends JFrame {
         layoutPrincipal.posicionarComponente(pnlChat, 0, 1);
 
         this.add(pnlPrincipal);
+    }
+
+    private void mostrarListaEmojis() {
+        JPopupMenu mnuEmoji = new JPopupMenu();
+        String[] emojis = {"🌍", "🌳", "🌱", "♻️", "🗑️", "🚮", "🛢️", "🔥", "⚠️", "🚨", "🚒", "🧯"};
+        JList<String> lstEmoji = new JList<>(emojis);
+
+        lstEmoji.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
+        lstEmoji.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        lstEmoji.setLayoutOrientation(JList.VERTICAL_WRAP);
+        lstEmoji.setVisibleRowCount(3);
+
+        // Espera a seleção senão buga tudo
+        lstEmoji.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                String selectedEmoji = lstEmoji.getSelectedValue();
+                txfEntrada.setText(txfEntrada.getText() + selectedEmoji);
+                mnuEmoji.setVisible(false);
+            }
+        });
+
+        JScrollPane pnlEmojis = new JScrollPane(lstEmoji);
+        mnuEmoji.add(pnlEmojis);
+        
+        int espacamento = 15;
+        int x = btnEmoji.getWidth() - pnlEmojis.getPreferredSize().width;
+        int y = btnEmoji.getY() - (mnuEmoji.getPreferredSize().height + espacamento);
+        mnuEmoji.show(btnEmoji, x, y);
     }
 
     private void adicionarTopico(String hashtag) {
