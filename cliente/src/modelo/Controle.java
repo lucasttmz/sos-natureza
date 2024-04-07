@@ -16,6 +16,11 @@ public class Controle {
         }
         return sucesso;
     }
+    
+    public void conectar() {
+       // Lógica da conexão
+       
+    }
 
     public String criarNovoTopico(List<String> infoTopico) {
         Topico topico = new Topico(

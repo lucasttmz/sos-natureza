@@ -1,10 +1,7 @@
 package apresentacao;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.List;
 import javax.swing.BorderFactory;
@@ -16,7 +13,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import modelo.Controle;
-import modelo.Topico;
 
 public class frmNovoTopico extends JDialog {
 
@@ -89,14 +85,8 @@ public class frmNovoTopico extends JDialog {
 
     private void criarTopico() {
         Controle controle = new Controle();
-        controle.criarNovoTopico(List.of(txfNome.getText(), txaDesc.getText(), txfFoto.getText()));
+        String hashtag = controle.criarNovoTopico(List.of(txfNome.getText(), txaDesc.getText(), txfFoto.getText()));
+        System.out.println(hashtag);
         this.dispose();
     }
-
-    public static void main(String[] args) {
-        frmNovoTopico frmNT = new frmNovoTopico();
-        frmNT.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        frmNT.setVisible(true);
-    }
-
 }

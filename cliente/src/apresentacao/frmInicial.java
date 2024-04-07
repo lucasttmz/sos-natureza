@@ -97,6 +97,7 @@ public class frmInicial extends JFrame {
     private void conectar() {
         Controle controle = new Controle();
         if (controle.validarConexao(txfNome.getText(), txfIP.getText(), txfPorta.getText())) {
+            // TODO: Mover para controle em uma única chamada de função
             frmChat frmC = new frmChat(txfNome.getText());
             frmC.setVisible(true);
             this.dispose();
