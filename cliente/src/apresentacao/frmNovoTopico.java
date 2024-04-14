@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.util.List;
+import java.util.Optional;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -20,6 +21,7 @@ public class frmNovoTopico extends JDialog {
     private JTextArea txaDesc;
     private JTextField txfNome;
     private JTextField txfFoto;
+    private String hashtag;
 
     public frmNovoTopico() {
         this.setTitle("Criar novo tópico");
@@ -79,13 +81,18 @@ public class frmNovoTopico extends JDialog {
         layout.posicionarComponente(txfFoto, 5, 0, 2, 1, margemCampos);
         layout.posicionarComponente(btnCriar, 6, 0, new Insets(30, 0, 0, 30));
         layout.posicionarComponente(btnCancelar, 6, 1, new Insets(30, 0, 0, 0));
-        
+
         this.add(pnlPrincipal);
     }
 
     private void criarTopico() {
+        // TODO: Validar criação do tópico
         Controle controle = new Controle();
-        String hashtag = controle.criarNovoTopico(List.of(txfNome.getText(), txaDesc.getText(), txfFoto.getText()));
+        this.hashtag = controle.criarNovoTopico(List.of(txfNome.getText(), txaDesc.getText(), txfFoto.getText()));
         this.dispose();
+    }
+
+    public Optional<String> getHashtag() {
+        return Optional.of(this.hashtag);
     }
 }

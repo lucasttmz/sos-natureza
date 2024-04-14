@@ -5,12 +5,12 @@ import java.util.List;
 
 public class Topico {
 
-    private Integer id;
+    private final Integer id;
     private String nome;
     private String descricao;
     private String caminhoFoto;
     private List<String> mensagens;
-    
+
     private static int ultimoId = 0;
 
     public Topico(String nome, String descricao, String caminhoFoto) {
@@ -20,7 +20,7 @@ public class Topico {
         this.caminhoFoto = caminhoFoto;
         this.mensagens = new ArrayList<>();
     }
-    
+
     public String getHashtag() {
         String slug = this.nome.toLowerCase().replaceAll(" ", "-");
         return "#" + slug;
@@ -62,5 +62,4 @@ public class Topico {
         this.mensagens = mensagens;
     }
 
-    
 }

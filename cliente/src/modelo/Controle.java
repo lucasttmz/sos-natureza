@@ -16,10 +16,10 @@ public class Controle {
         }
         return sucesso;
     }
-    
+
     public void conectar() {
-       // Lógica da conexão
-       
+        // Lógica da conexão
+
     }
 
     public String criarNovoTopico(List<String> infoTopico) {

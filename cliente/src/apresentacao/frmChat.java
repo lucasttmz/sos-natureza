@@ -89,10 +89,11 @@ public class frmChat extends JFrame {
         btnCriarTopico.addActionListener((e) -> {
             frmNovoTopico frmNT = new frmNovoTopico();
             frmNT.setVisible(true);
-            adicionarTopico("#hehe");
-            atualizarTopicos();
-            revalidate();
-
+            frmNT.getHashtag().ifPresent((hashtag) -> {
+                adicionarTopico(hashtag);
+                atualizarTopicos();
+                revalidate();     
+            });
         });
         btnCriarTopico.setPreferredSize(new Dimension(135, 25));
         btnCriarTopico.setHorizontalAlignment(SwingConstants.LEFT);
@@ -214,5 +215,11 @@ public class frmChat extends JFrame {
             pnlTopicos.add(topico);
         }
 
+    }
+    
+    // Temporario para não ter que digitar o ip toda vez que for testar
+    public static void main(String[] args) {
+        frmChat frmChat = new frmChat("teste");
+        frmChat.setVisible(true);
     }
 }
