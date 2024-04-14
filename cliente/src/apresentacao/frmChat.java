@@ -45,10 +45,9 @@ public class frmChat extends JFrame {
     public frmChat(String nome) {
         this.nomeExibicao = nome;
         this.topicos = new LinkedHashMap<>(); // Preserva a ordem
+        
         iniciarComponentes();
-
-        // Mostrar tópicos disponíveis
-        adicionarTopico("#geral");
+        adicionarTopicoGeral();
 
         this.setTitle("SOS Natureza");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -91,8 +90,7 @@ public class frmChat extends JFrame {
             frmNovoTopico frmNT = new frmNovoTopico();
             frmNT.setVisible(true);
             frmNT.getHashtag().ifPresent((hashtag) -> {
-                adicionarTopico(hashtag);
-//                atualizarTopicos();
+                adicionarNovoTopico(hashtag);
                 revalidate();
             });
         });
@@ -197,8 +195,35 @@ public class frmChat extends JFrame {
         mnuEmoji.show(btnEmoji, x, y);
     }
 
-    private void adicionarTopico(String hashtag) {
-        JPanel pnl = new JPanel();
+    private void adicionarTopicoGeral() {
+        JPanel pnlTopico = new JPanel();
+        JLabel lblAba = adicionarAba("#geral", pnlTopico);
+
+        JLabel lblHashtag = new JLabel();
+        lblHashtag.setText("#geral");
+        
+        pnlTopico.add(lblHashtag);
+        
+        topicos.put(lblAba, pnlTopico);
+        pnlMensagens.add(pnlTopico, lblAba.getText());
+        atualizarTopicos();
+    }
+    
+    private void adicionarNovoTopico(String hashtag) {
+        JPanel pnlTopico = new JPanel();
+        
+        JLabel lblHashtag = new JLabel();
+        lblHashtag.setText(hashtag);
+        
+        pnlTopico.add(lblHashtag);
+ 
+        JLabel lblAba = adicionarAba(hashtag, pnlTopico);
+        topicos.put(lblAba, pnlTopico);
+        pnlMensagens.add(pnlTopico, lblAba.getText());
+        atualizarTopicos();
+    }
+
+    private JLabel adicionarAba(String hashtag, JPanel painel) {
         JLabel lbl = new JLabel(hashtag);
         lbl.setBorder(BorderFactory.createSoftBevelBorder(0));
         lbl.setPreferredSize(new Dimension(274, 25));
@@ -212,14 +237,13 @@ public class frmChat extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 System.out.println(lbl.getText());
+                layoutMensagens.show(pnlMensagens, lbl.getText());
             }
         });
-
-        topicos.put(lbl, pnl);
-
-        atualizarTopicos();
+        
+        return lbl;
     }
-
+    
     private void atualizarTopicos() {
         int altura = (topicos.size() + 1) * 30;
         pnlTopicos.setPreferredSize(new Dimension(274, altura));
