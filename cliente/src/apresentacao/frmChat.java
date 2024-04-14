@@ -1,12 +1,15 @@
 package apresentacao;
 
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Insets;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -23,7 +26,7 @@ import javax.swing.SwingConstants;
 public class frmChat extends JFrame {
 
     private final String nomeExibicao;
-    private final List<JLabel> topicos;
+    private final Map<JLabel, JPanel> topicos;
 
     private JTextField txfEntrada;
     private JButton btnEmoji;
@@ -36,13 +39,16 @@ public class frmChat extends JFrame {
     private JPanel pnlTopicos;
     private Layout layoutPrincipal;
     private Layout layoutLateral;
-    private Layout layoutMensagens;
     private Layout layoutChat;
+    private CardLayout layoutMensagens;
 
     public frmChat(String nome) {
         this.nomeExibicao = nome;
-        this.topicos = new ArrayList<>();
+        this.topicos = new LinkedHashMap<>(); // Preserva a ordem
         iniciarComponentes();
+
+        // Mostrar tópicos disponíveis
+        adicionarTopico("#geral");
 
         this.setTitle("SOS Natureza");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -79,11 +85,6 @@ public class frmChat extends JFrame {
         pnlTopicos.setMinimumSize(new Dimension(274, 50));
         pnlTopicos.setLayout(new FlowLayout());
 
-        // Mostrar tópicos disponíveis
-        adicionarTopico("#geral");
-        adicionarTopico("#outros");
-        atualizarTopicos();
-
         // Criar tópico
         JButton btnCriarTopico = new JButton("Criar Novo Tópico");
         btnCriarTopico.addActionListener((e) -> {
@@ -91,8 +92,8 @@ public class frmChat extends JFrame {
             frmNT.setVisible(true);
             frmNT.getHashtag().ifPresent((hashtag) -> {
                 adicionarTopico(hashtag);
-                atualizarTopicos();
-                revalidate();     
+//                atualizarTopicos();
+                revalidate();
             });
         });
         btnCriarTopico.setPreferredSize(new Dimension(135, 25));
@@ -143,9 +144,11 @@ public class frmChat extends JFrame {
         pnlMensagens.setBorder(BorderFactory.createEtchedBorder());
         pnlMensagens.setMinimumSize(new Dimension(1092, 675));
         pnlMensagens.setPreferredSize(new Dimension(1092, 675));
-        layoutMensagens = new Layout(pnlMensagens);
-        layoutMensagens.preencherHorizontalmente(true);
 
+        layoutMensagens = new CardLayout();
+        pnlMensagens.setLayout(layoutMensagens);
+
+        // TODO: Adicionar #geral
     }
 
     private void configurarPainelPrincipal() {
@@ -176,8 +179,8 @@ public class frmChat extends JFrame {
         lstEmoji.setLayoutOrientation(JList.VERTICAL_WRAP);
         lstEmoji.setVisibleRowCount(3);
 
-        // Espera a seleção senão buga tudo
         lstEmoji.addListSelectionListener(e -> {
+            // Espera a seleção senão buga tudo
             if (!e.getValueIsAdjusting()) {
                 String selectedEmoji = lstEmoji.getSelectedValue();
                 txfEntrada.setText(txfEntrada.getText() + selectedEmoji);
@@ -187,7 +190,7 @@ public class frmChat extends JFrame {
 
         JScrollPane pnlEmojis = new JScrollPane(lstEmoji);
         mnuEmoji.add(pnlEmojis);
-        
+
         int espacamento = 15;
         int x = btnEmoji.getWidth() - pnlEmojis.getPreferredSize().width;
         int y = btnEmoji.getY() - (mnuEmoji.getPreferredSize().height + espacamento);
@@ -195,6 +198,7 @@ public class frmChat extends JFrame {
     }
 
     private void adicionarTopico(String hashtag) {
+        JPanel pnl = new JPanel();
         JLabel lbl = new JLabel(hashtag);
         lbl.setBorder(BorderFactory.createSoftBevelBorder(0));
         lbl.setPreferredSize(new Dimension(274, 25));
@@ -203,7 +207,17 @@ public class frmChat extends JFrame {
         lbl.setHorizontalTextPosition(SwingConstants.CENTER);
         lbl.setVerticalTextPosition(SwingConstants.BOTTOM);
         lbl.setFont(new Font("Arial", Font.BOLD, 16));
-        topicos.add(lbl);
+
+        lbl.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                System.out.println(lbl.getText());
+            }
+        });
+
+        topicos.put(lbl, pnl);
+
+        atualizarTopicos();
     }
 
     private void atualizarTopicos() {
@@ -211,12 +225,12 @@ public class frmChat extends JFrame {
         pnlTopicos.setPreferredSize(new Dimension(274, altura));
         pnlTopicos.setMinimumSize(new Dimension(274, altura));
 
-        for (JLabel topico : topicos) {
-            pnlTopicos.add(topico);
+        for (Map.Entry<JLabel, JPanel> topico : topicos.entrySet()) {
+            pnlTopicos.add(topico.getKey());
         }
 
     }
-    
+
     // Temporario para não ter que digitar o ip toda vez que for testar
     public static void main(String[] args) {
         frmChat frmChat = new frmChat("teste");

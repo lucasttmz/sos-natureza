@@ -93,6 +93,6 @@ public class frmNovoTopico extends JDialog {
     }
 
     public Optional<String> getHashtag() {
-        return Optional.of(this.hashtag);
+        return Optional.ofNullable(this.hashtag);
     }
 }
