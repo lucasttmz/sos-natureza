@@ -6,8 +6,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Insets;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
@@ -59,10 +57,7 @@ public class frmChat extends JFrame {
         this.msgSalva = new HashMap<>();
 
         iniciarComponentes();
-        adicionarTopicoGeral();
-        adicionarDemaisTopicos();
-        mostrarTopico("#geral");
-
+ 
         this.setTitle("SOS Natureza");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
@@ -75,6 +70,9 @@ public class frmChat extends JFrame {
         configurarPainelEntrada();
         configurarPainelMensagens();
         configurarPainelPrincipal();
+        adicionarTopicoGeral();
+        adicionarDemaisTopicos();
+        mostrarTopico("#geral");
     }
 
     private void configurarPainelLateral() {
@@ -219,33 +217,36 @@ public class frmChat extends JFrame {
     private void adicionarTopicoGeral() {
         JPanel pnlTopico = new JPanel();
         JLabel lblAba = adicionarAba("#geral", pnlTopico);
-
         JPanel pnlDetalhes = new JPanel();
         Layout layoutDetalhes = new Layout(pnlDetalhes);
         pnlDetalhes.setPreferredSize(new Dimension(1085, 210));
 
+        final int larguraMaxima = 1085;
+        final int tamanhoImagem = 200;
         Controle controle = new Controle();
+
         List<String> infoTopico = controle.informacoesTopico("#outros");
 
-        int largura = 1085;
-
-        JLabel lblImagem = new JLabel(infoTopico.get(2));
-        lblImagem.setBackground(Color.WHITE);
-        lblImagem.setBorder(BorderFactory.createBevelBorder(0));
-        lblImagem.setPreferredSize(new Dimension(200, 200));
-
+        // Título do tópico
         JLabel lblTitulo = new JLabel(infoTopico.get(0));
         lblTitulo.setFont(new Font("Segoe UI", Font.PLAIN, 52));
         lblTitulo.setBackground(Color.white);
-        lblTitulo.setPreferredSize(new Dimension(largura - 200, 50));
+        lblTitulo.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem, 50));
         lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
 
+        // Descrição do tópico
         JLabel lblDesc = new JLabel(infoTopico.get(1));
         lblDesc.setFont(new Font("Segoe UI", Font.PLAIN, 22));
         lblDesc.setBackground(Color.CYAN);
-        lblDesc.setPreferredSize(new Dimension(largura - 200, 150));
+        lblDesc.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem, 150));
         lblDesc.setHorizontalAlignment(SwingConstants.CENTER);
         lblDesc.setVerticalAlignment(SwingConstants.TOP);
+
+        // Imagem do tópico
+        JLabel lblImagem = new JLabel(infoTopico.get(2));
+        lblImagem.setBackground(Color.WHITE);
+        lblImagem.setBorder(BorderFactory.createBevelBorder(0));
+        lblImagem.setPreferredSize(new Dimension(tamanhoImagem, tamanhoImagem));
 
         layoutDetalhes.posicionarComponente(lblImagem, 0, 0, 1, 3);
         layoutDetalhes.posicionarComponente(lblTitulo, 0, 1, 1, 1);
@@ -253,11 +254,11 @@ public class frmChat extends JFrame {
         layoutDetalhes.posicionarComponente(lblDesc, 2, 1, 1, 1);
 
         JPanel pnlMsg = new JPanel();
-        pnlMsg.setPreferredSize(new Dimension(largura, 100));
+        pnlMsg.setPreferredSize(new Dimension(larguraMaxima, 100));
         pnlMsg.setBorder(BorderFactory.createSoftBevelBorder(0));
-        
+
+        // Mensagens do tópico
         JLabel lblUltimasMensagens = new JLabel("Últimas Mensagens");
-        
         JScrollPane scrollMensagens = new JScrollPane();
         JTextArea txaMensagens = new JTextArea();
         txaMensagens.setLineWrap(true);
@@ -269,6 +270,7 @@ public class frmChat extends JFrame {
         pnlMsg.add(lblUltimasMensagens);
         pnlMsg.add(scrollMensagens);
 
+        // Mostra apenas as três últimas mensagens
         List<String> todasMensagens = controle.todasMensagens("#outros");
         for (int i = todasMensagens.size() - 3; i < todasMensagens.size(); i++) {
             String mensagem = todasMensagens.get(i);
@@ -281,6 +283,7 @@ public class frmChat extends JFrame {
         pnlTopico.add(pnlDetalhes);
         pnlTopico.add(pnlMsg);
 
+        // Salva o estado do #geral
         paineisTopicos.put(lblAba, pnlTopico);
         pnlMensagens.add(pnlTopico, lblAba.getText());
         atualizarTopicos();
@@ -296,34 +299,37 @@ public class frmChat extends JFrame {
 
     private void adicionarNovoTopico(String hashtag) {
         JPanel pnlTopico = new JPanel();
-
+        JLabel lblAba = adicionarAba(hashtag, pnlTopico);
         JPanel pnlDetalhes = new JPanel();
         Layout layoutDetalhes = new Layout(pnlDetalhes);
         pnlDetalhes.setPreferredSize(new Dimension(1085, 210));
 
+        final int larguraMaxima = 1085;
+        final int tamanhoImagem = 200;
         Controle controle = new Controle();
+
         List<String> infoTopico = controle.informacoesTopico(hashtag);
 
-        JLabel lblImagem = new JLabel(infoTopico.get(2));
-        lblImagem.setBackground(Color.WHITE);
-        lblImagem.setBorder(BorderFactory.createBevelBorder(0));
-        lblImagem.setPreferredSize(new Dimension(200, 200));
-
-        int largura = 1085;
-
+        // Título do tópico
         JLabel lblTitulo = new JLabel(infoTopico.get(0));
         lblTitulo.setFont(new Font("Segoe UI", Font.PLAIN, 52));
         lblTitulo.setBackground(Color.white);
-        lblTitulo.setPreferredSize(new Dimension(largura - 200, 50));
+        lblTitulo.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem, 50));
         lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
 
+        // Descrição do tópico
         JLabel lblDesc = new JLabel(infoTopico.get(1));
         lblDesc.setFont(new Font("Segoe UI", Font.PLAIN, 22));
         lblDesc.setBackground(Color.CYAN);
-        lblDesc.setPreferredSize(new Dimension(largura - 200, 150));
+        lblDesc.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem, 150));
         lblDesc.setHorizontalAlignment(SwingConstants.CENTER);
         lblDesc.setVerticalAlignment(SwingConstants.TOP);
 
+        // Imagem do tópico
+        JLabel lblImagem = new JLabel(infoTopico.get(2));
+        lblImagem.setBackground(Color.WHITE);
+        lblImagem.setBorder(BorderFactory.createBevelBorder(0));
+        lblImagem.setPreferredSize(new Dimension(tamanhoImagem, 200));
 
         layoutDetalhes.posicionarComponente(lblImagem, 0, 0, 1, 3);
         layoutDetalhes.posicionarComponente(lblTitulo, 0, 1, 1, 1);
@@ -331,8 +337,10 @@ public class frmChat extends JFrame {
         layoutDetalhes.posicionarComponente(lblDesc, 2, 1, 1, 1);
 
         JPanel pnlMsg = new JPanel();
-        pnlMsg.setPreferredSize(new Dimension(largura, 450));
+        pnlMsg.setPreferredSize(new Dimension(larguraMaxima, 450));
         pnlMsg.setBorder(BorderFactory.createSoftBevelBorder(0));
+
+        // Mensagens do tópico
         JScrollPane scrollMensagens = new JScrollPane();
         JTextArea txaMensagens = new JTextArea();
         txaMensagens.setLineWrap(true);
@@ -343,21 +351,20 @@ public class frmChat extends JFrame {
         scrollMensagens.setViewportView(txaMensagens);
         pnlMsg.add(scrollMensagens);
 
+        // Mostra todas as mensagens
         List<String> todasMensagens = controle.todasMensagens(hashtag);
         for (String mensagem : todasMensagens) {
             txaMensagens.append(mensagem);
         }
 
-        mensagensTopicos.put(hashtag, txaMensagens);
-
         pnlTopico.add(pnlDetalhes);
         pnlTopico.add(pnlMsg);
-
-        JLabel lblAba = adicionarAba(hashtag, pnlTopico);
         paineisTopicos.put(lblAba, pnlTopico);
         pnlMensagens.add(pnlTopico, lblAba.getText());
         atualizarTopicos();
 
+        // Salva o estado do lado do cliente
+        mensagensTopicos.put(hashtag, txaMensagens);
         msgSalva.put(hashtag, "");
     }
 
