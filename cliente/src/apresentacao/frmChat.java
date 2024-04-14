@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
@@ -13,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -57,7 +60,7 @@ public class frmChat extends JFrame {
         this.msgSalva = new HashMap<>();
 
         iniciarComponentes();
- 
+
         this.setTitle("SOS Natureza");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
@@ -128,10 +131,12 @@ public class frmChat extends JFrame {
         pnlEntrada.setPreferredSize(new Dimension(1092, 43));
 
         // Entrada
-        txfEntrada = new JTextField();
-        // TODO: Encontrar uma fonte melhor
+        txfEntrada = new JTextField("Digite sua mensagem aqui");
         txfEntrada.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
         txfEntrada.setPreferredSize(new Dimension(905, 30));
+        txfEntrada.setForeground(Color.GRAY);
+
+        // Envio da mensagem
         txfEntrada.addActionListener((e) -> {
             if (txfEntrada.getText().isBlank()) {
                 return;
@@ -139,6 +144,26 @@ public class frmChat extends JFrame {
             JTextArea txaMsg = mensagensTopicos.get(canalAtual);
             txaMsg.append(nomeExibicao + ": " + txfEntrada.getText() + "\n");
             txfEntrada.setText("");
+        });
+
+        // Placeholder da mensagem
+        txfEntrada.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (txfEntrada.getText().equals("Digite sua mensagem aqui")) {
+                    txfEntrada.setText("");
+                }
+                txfEntrada.setForeground(Color.BLACK);
+
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (txfEntrada.getText().isEmpty()) {
+                    txfEntrada.setForeground(Color.GRAY);
+                    txfEntrada.setText("Digite sua mensagem aqui");
+                }
+            }
         });
 
         // Emoji
@@ -216,10 +241,11 @@ public class frmChat extends JFrame {
 
     private void adicionarTopicoGeral() {
         JPanel pnlTopico = new JPanel();
+        pnlTopico.setLayout(new BoxLayout(pnlTopico, BoxLayout.Y_AXIS));
+        JScrollPane scrollTopicos = new JScrollPane(pnlTopico);
+        scrollTopicos.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        scrollTopicos.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         JLabel lblAba = adicionarAba("#geral", pnlTopico);
-        JPanel pnlDetalhes = new JPanel();
-        Layout layoutDetalhes = new Layout(pnlDetalhes);
-        pnlDetalhes.setPreferredSize(new Dimension(1085, 210));
 
         final int larguraMaxima = 1085;
         final int tamanhoImagem = 200;
@@ -227,65 +253,73 @@ public class frmChat extends JFrame {
 
         List<String> infoTopico = controle.informacoesTopico("#outros");
 
-        // Título do tópico
-        JLabel lblTitulo = new JLabel(infoTopico.get(0));
-        lblTitulo.setFont(new Font("Segoe UI", Font.PLAIN, 52));
-        lblTitulo.setBackground(Color.white);
-        lblTitulo.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem, 50));
-        lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
+        for (int x = 0; x < 3; x++) {
+            JPanel pnlDetalhes = new JPanel();
+            Layout layoutDetalhes = new Layout(pnlDetalhes);
+            pnlDetalhes.setPreferredSize(new Dimension(larguraMaxima, tamanhoImagem + 10));
+            pnlDetalhes.setMaximumSize(new Dimension(larguraMaxima, tamanhoImagem + 10));
 
-        // Descrição do tópico
-        JLabel lblDesc = new JLabel(infoTopico.get(1));
-        lblDesc.setFont(new Font("Segoe UI", Font.PLAIN, 22));
-        lblDesc.setBackground(Color.CYAN);
-        lblDesc.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem, 150));
-        lblDesc.setHorizontalAlignment(SwingConstants.CENTER);
-        lblDesc.setVerticalAlignment(SwingConstants.TOP);
+            // Título do tópico
+            JLabel lblTitulo = new JLabel(infoTopico.get(0));
+            lblTitulo.setFont(new Font("Segoe UI", Font.PLAIN, 52));
+            lblTitulo.setBackground(Color.white);
+            lblTitulo.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 50));
+            lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
 
-        // Imagem do tópico
-        JLabel lblImagem = new JLabel(infoTopico.get(2));
-        lblImagem.setBackground(Color.WHITE);
-        lblImagem.setBorder(BorderFactory.createBevelBorder(0));
-        lblImagem.setPreferredSize(new Dimension(tamanhoImagem, tamanhoImagem));
+            // Descrição do tópico
+            JLabel lblDesc = new JLabel(infoTopico.get(1));
+            lblDesc.setFont(new Font("Segoe UI", Font.PLAIN, 22));
+            lblDesc.setBackground(Color.CYAN);
+            lblDesc.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 150));
+            lblDesc.setHorizontalAlignment(SwingConstants.CENTER);
+            lblDesc.setVerticalAlignment(SwingConstants.TOP);
 
-        layoutDetalhes.posicionarComponente(lblImagem, 0, 0, 1, 3);
-        layoutDetalhes.posicionarComponente(lblTitulo, 0, 1, 1, 1);
-        layoutDetalhes.posicionarComponente(new JSeparator(), 1, 1, 1, 1);
-        layoutDetalhes.posicionarComponente(lblDesc, 2, 1, 1, 1);
+            // Imagem do tópico
+            JLabel lblImagem = new JLabel(infoTopico.get(2));
+            lblImagem.setBackground(Color.WHITE);
+            lblImagem.setBorder(BorderFactory.createBevelBorder(0));
+            lblImagem.setPreferredSize(new Dimension(tamanhoImagem, tamanhoImagem));
 
-        JPanel pnlMsg = new JPanel();
-        pnlMsg.setPreferredSize(new Dimension(larguraMaxima, 100));
-        pnlMsg.setBorder(BorderFactory.createSoftBevelBorder(0));
+            layoutDetalhes.posicionarComponente(lblImagem, 0, 0, 1, 3);
+            layoutDetalhes.posicionarComponente(lblTitulo, 0, 1, 1, 1);
+            layoutDetalhes.posicionarComponente(new JSeparator(), 1, 1, 1, 1);
+            layoutDetalhes.posicionarComponente(lblDesc, 2, 1, 1, 1);
 
-        // Mensagens do tópico
-        JLabel lblUltimasMensagens = new JLabel("Últimas Mensagens");
-        JScrollPane scrollMensagens = new JScrollPane();
-        JTextArea txaMensagens = new JTextArea();
-        txaMensagens.setLineWrap(true);
-        txaMensagens.setWrapStyleWord(true);
-        txaMensagens.setColumns(97);
-        txaMensagens.setRows(3);
-        txaMensagens.setEditable(false);
-        scrollMensagens.setViewportView(txaMensagens);
-        pnlMsg.add(lblUltimasMensagens);
-        pnlMsg.add(scrollMensagens);
+            // Painel mensagens
+            JPanel pnlMsg = new JPanel();
+            pnlMsg.setPreferredSize(new Dimension(larguraMaxima, 70));
+            pnlMsg.setMaximumSize(new Dimension(larguraMaxima, 70));
+            pnlMsg.setBorder(BorderFactory.createSoftBevelBorder(0));
 
-        // Mostra apenas as três últimas mensagens
-        List<String> todasMensagens = controle.todasMensagens("#outros");
-        for (int i = todasMensagens.size() - 3; i < todasMensagens.size(); i++) {
-            String mensagem = todasMensagens.get(i);
-            if (i == todasMensagens.size() - 1) {
-                mensagem = mensagem.strip();
+            // Mensagens do tópico
+            JScrollPane scrollMensagens = new JScrollPane();
+            JTextArea txaMensagens = new JTextArea();
+            txaMensagens.setLineWrap(true);
+            txaMensagens.setWrapStyleWord(true);
+            txaMensagens.setColumns(97);
+            txaMensagens.setRows(3);
+            txaMensagens.setEditable(false);
+            scrollMensagens.setViewportView(txaMensagens);
+            pnlMsg.add(scrollMensagens);
+
+            // Mostra apenas as três últimas mensagens
+            List<String> todasMensagens = controle.todasMensagens("#outros");
+            for (int i = todasMensagens.size() - 3; i < todasMensagens.size(); i++) {
+                String mensagem = todasMensagens.get(i);
+                if (i == todasMensagens.size() - 1) {
+                    mensagem = mensagem.strip();
+                }
+                txaMensagens.append(mensagem);
             }
-            txaMensagens.append(mensagem);
-        }
 
-        pnlTopico.add(pnlDetalhes);
-        pnlTopico.add(pnlMsg);
+            // Adiciona o tópico
+            pnlTopico.add(pnlDetalhes);
+            pnlTopico.add(pnlMsg);
+        }
 
         // Salva o estado do #geral
         paineisTopicos.put(lblAba, pnlTopico);
-        pnlMensagens.add(pnlTopico, lblAba.getText());
+        pnlMensagens.add(scrollTopicos, lblAba.getText());
         atualizarTopicos();
     }
 
@@ -300,28 +334,29 @@ public class frmChat extends JFrame {
     private void adicionarNovoTopico(String hashtag) {
         JPanel pnlTopico = new JPanel();
         JLabel lblAba = adicionarAba(hashtag, pnlTopico);
-        JPanel pnlDetalhes = new JPanel();
-        Layout layoutDetalhes = new Layout(pnlDetalhes);
-        pnlDetalhes.setPreferredSize(new Dimension(1085, 210));
 
         final int larguraMaxima = 1085;
         final int tamanhoImagem = 200;
         Controle controle = new Controle();
-
         List<String> infoTopico = controle.informacoesTopico(hashtag);
+
+        // Painel dos detalhes do tópico
+        JPanel pnlDetalhes = new JPanel();
+        Layout layoutDetalhes = new Layout(pnlDetalhes);
+        pnlDetalhes.setPreferredSize(new Dimension(larguraMaxima, tamanhoImagem + 10));
 
         // Título do tópico
         JLabel lblTitulo = new JLabel(infoTopico.get(0));
         lblTitulo.setFont(new Font("Segoe UI", Font.PLAIN, 52));
         lblTitulo.setBackground(Color.white);
-        lblTitulo.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem, 50));
+        lblTitulo.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 50));
         lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
 
         // Descrição do tópico
         JLabel lblDesc = new JLabel(infoTopico.get(1));
         lblDesc.setFont(new Font("Segoe UI", Font.PLAIN, 22));
         lblDesc.setBackground(Color.CYAN);
-        lblDesc.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem, 150));
+        lblDesc.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 150));
         lblDesc.setHorizontalAlignment(SwingConstants.CENTER);
         lblDesc.setVerticalAlignment(SwingConstants.TOP);
 
@@ -336,6 +371,7 @@ public class frmChat extends JFrame {
         layoutDetalhes.posicionarComponente(new JSeparator(), 1, 1, 1, 1);
         layoutDetalhes.posicionarComponente(lblDesc, 2, 1, 1, 1);
 
+        // Painel mensagens
         JPanel pnlMsg = new JPanel();
         pnlMsg.setPreferredSize(new Dimension(larguraMaxima, 450));
         pnlMsg.setBorder(BorderFactory.createSoftBevelBorder(0));
@@ -368,6 +404,7 @@ public class frmChat extends JFrame {
         msgSalva.put(hashtag, "");
     }
 
+    // TODO: o painel não está sendo usado, retirar depois
     private JLabel adicionarAba(String hashtag, JPanel painel) {
         JLabel lbl = new JLabel(hashtag);
         lbl.setBorder(BorderFactory.createSoftBevelBorder(0));
@@ -402,6 +439,7 @@ public class frmChat extends JFrame {
         txfEntrada.setText(msgSalva.get(canalAtual));
 
         if (hashtag.equals("#geral")) {
+            txfEntrada.setText("Não é possível enviar mensagens no #geral");
             txfEntrada.setEnabled(false);
             btnEnviar.setEnabled(false);
             btnEmoji.setEnabled(false);
@@ -411,6 +449,13 @@ public class frmChat extends JFrame {
             btnEmoji.setEnabled(true);
         }
 
+        String textoDigitado = txfEntrada.getText();
+        if (textoDigitado.isEmpty() || textoDigitado.equals("Digite sua mensagem aqui")) {
+            txfEntrada.setForeground(Color.GRAY);
+            txfEntrada.setText("Digite sua mensagem aqui");
+        } else {
+            txfEntrada.setForeground(Color.BLACK);
+        }
     }
 
     private void atualizarTopicos() {
