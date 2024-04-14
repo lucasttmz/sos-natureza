@@ -8,6 +8,7 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.BorderFactory;
@@ -22,15 +23,13 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import modelo.Controle;
+import modelo.Topico;
 
 public class frmChat extends JFrame {
 
-    private final String nomeExibicao;
-    private final Map<JLabel, JPanel> topicos;
-
     private JTextField txfEntrada;
     private JButton btnEmoji;
-
     private JPanel pnlPrincipal;
     private JPanel pnlLateral;
     private JPanel pnlChat;
@@ -42,12 +41,20 @@ public class frmChat extends JFrame {
     private Layout layoutChat;
     private CardLayout layoutMensagens;
 
+    private final String nomeExibicao;
+    // Talvez juntar com tópicos Map<JLabel, Map<JPanel, Layout>>
+    private final Map<JLabel, JPanel> topicos;
+    private final Map<String, JPanel> mensagensTopicos;
+
     public frmChat(String nome) {
         this.nomeExibicao = nome;
         this.topicos = new LinkedHashMap<>(); // Preserva a ordem
-        
+        this.mensagensTopicos = new HashMap<>();
+
         iniciarComponentes();
         adicionarTopicoGeral();
+        adicionarDemaisTopicos();
+        mostrarTopico("#geral");
 
         this.setTitle("SOS Natureza");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -201,22 +208,30 @@ public class frmChat extends JFrame {
 
         JLabel lblHashtag = new JLabel();
         lblHashtag.setText("#geral");
-        
+
         pnlTopico.add(lblHashtag);
-        
+
         topicos.put(lblAba, pnlTopico);
         pnlMensagens.add(pnlTopico, lblAba.getText());
         atualizarTopicos();
     }
     
+    private void adicionarDemaisTopicos() {
+        Controle controle = new Controle();
+        HashMap<String, Topico> todosTopicos = controle.getTodosTopicos();
+        for (Map.Entry<String, Topico> topico : todosTopicos.entrySet()) {
+            adicionarNovoTopico(topico.getKey());
+        }
+    }
+
     private void adicionarNovoTopico(String hashtag) {
         JPanel pnlTopico = new JPanel();
-        
+
         JLabel lblHashtag = new JLabel();
         lblHashtag.setText(hashtag);
-        
+
         pnlTopico.add(lblHashtag);
- 
+
         JLabel lblAba = adicionarAba(hashtag, pnlTopico);
         topicos.put(lblAba, pnlTopico);
         pnlMensagens.add(pnlTopico, lblAba.getText());
@@ -236,14 +251,17 @@ public class frmChat extends JFrame {
         lbl.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                System.out.println(lbl.getText());
-                layoutMensagens.show(pnlMensagens, lbl.getText());
+                mostrarTopico(lbl.getText());
             }
         });
-        
+
         return lbl;
     }
     
+    private void mostrarTopico(String hashtag) {
+        layoutMensagens.show(pnlMensagens, hashtag);
+    }
+
     private void atualizarTopicos() {
         int altura = (topicos.size() + 1) * 30;
         pnlTopicos.setPreferredSize(new Dimension(274, altura));

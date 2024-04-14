@@ -9,6 +9,7 @@ public class Topico {
     private String nome;
     private String descricao;
     private String caminhoFoto;
+    // Mudar para uma list thread-safe
     private List<String> mensagens;
 
     private static int ultimoId = 0;
@@ -19,6 +20,8 @@ public class Topico {
         this.descricao = descricao;
         this.caminhoFoto = caminhoFoto;
         this.mensagens = new ArrayList<>();
+        this.mensagens.add(this.nome + ": hehe");
+        this.mensagens.add(this.nome + ": haha");
     }
 
     public String getHashtag() {
