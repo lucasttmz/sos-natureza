@@ -29,7 +29,6 @@ import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import modelo.Controle;
-import modelo.Topico;
 
 public class frmChat extends JFrame {
 
@@ -251,9 +250,7 @@ public class frmChat extends JFrame {
         final int tamanhoImagem = 200;
         Controle controle = new Controle();
 
-        List<String> infoTopico = controle.informacoesTopico("#outros");
-
-        for (int x = 0; x < 3; x++) {
+        for (List<String> infoTopico : controle.getTodosTopicos()) {
             JPanel pnlDetalhes = new JPanel();
             Layout layoutDetalhes = new Layout(pnlDetalhes);
             pnlDetalhes.setPreferredSize(new Dimension(larguraMaxima, tamanhoImagem + 10));
@@ -303,7 +300,7 @@ public class frmChat extends JFrame {
             pnlMsg.add(scrollMensagens);
 
             // Mostra apenas as três últimas mensagens
-            List<String> todasMensagens = controle.todasMensagens("#outros");
+            List<String> todasMensagens = controle.todasMensagens(infoTopico.get(3));
             for (int i = todasMensagens.size() - 3; i < todasMensagens.size(); i++) {
                 String mensagem = todasMensagens.get(i);
                 if (i == todasMensagens.size() - 1) {
@@ -325,9 +322,8 @@ public class frmChat extends JFrame {
 
     private void adicionarDemaisTopicos() {
         Controle controle = new Controle();
-        HashMap<String, Topico> todosTopicos = controle.getTodosTopicos();
-        for (Map.Entry<String, Topico> topico : todosTopicos.entrySet()) {
-            adicionarNovoTopico(topico.getKey());
+        for (List<String> topico : controle.getTodosTopicos()) {
+            adicionarNovoTopico(topico.get(3));
         }
     }
 

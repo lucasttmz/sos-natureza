@@ -2,6 +2,7 @@ package modelo;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Controle {
 
@@ -14,7 +15,7 @@ public class Controle {
         todosTopicos.put("#outros", new Topico("outros", "nada demais", ""));
         todosTopicos.put("#testes", new Topico("testes", "descricao", "img.png"));
     }
-    
+
     public boolean validarConexao(String nome, String ip, String porta) {
         Validacao validacao = new Validacao();
         boolean sucesso = validacao.validarNome(nome) && validacao.validarIp(ip, porta);
@@ -28,10 +29,10 @@ public class Controle {
         // Lógica da conexão
 
     }
-    
+
     public List<String> informacoesTopico(String hashtag) {
         Topico topico = todosTopicos.get(hashtag);
-        return List.of(topico.getNome(), topico.getDescricao(), topico.getCaminhoFoto());
+        return List.of(topico.getNome(), topico.getDescricao(), topico.getCaminhoFoto(), topico.getHashtag());
     }
 
     public List<String> todasMensagens(String hashtag) {
@@ -51,15 +52,19 @@ public class Controle {
 
     public void excluirTopico(String hashtag) {
         Topico removido = todosTopicos.remove(hashtag);
-        if (removido == null) {
-            // Informa que não foi possível remover
+        if (removido != null) {
+            // Informa o servidor
+        } else {
+            this.mensagem = "Erro ao apagar o tópico";
         }
     }
 
-    public HashMap<String, Topico> getTodosTopicos() {
-        return todosTopicos;
+    public List<List<String>> getTodosTopicos() {
+        return todosTopicos.keySet().stream()
+                .map(hashtag -> informacoesTopico(hashtag))
+                .collect(Collectors.toList());
     }
-    
+
     public String getMensagem() {
         return mensagem;
     }
