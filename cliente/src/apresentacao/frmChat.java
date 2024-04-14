@@ -6,10 +6,13 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -21,6 +24,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import modelo.Controle;
@@ -30,6 +34,7 @@ public class frmChat extends JFrame {
 
     private JTextField txfEntrada;
     private JButton btnEmoji;
+    private JButton btnEnviar;
     private JPanel pnlPrincipal;
     private JPanel pnlLateral;
     private JPanel pnlChat;
@@ -41,15 +46,17 @@ public class frmChat extends JFrame {
     private Layout layoutChat;
     private CardLayout layoutMensagens;
 
+    private String canalAtual = "#geral"; // Mover para o modelo
     private final String nomeExibicao;
-    // Talvez juntar com tópicos Map<JLabel, Map<JPanel, Layout>>
-    private final Map<JLabel, JPanel> topicos;
-    private final Map<String, JPanel> mensagensTopicos;
+    private final Map<String, String> msgSalva;
+    private final Map<JLabel, JPanel> paineisTopicos;
+    private final Map<String, JTextArea> mensagensTopicos;
 
     public frmChat(String nome) {
         this.nomeExibicao = nome;
-        this.topicos = new LinkedHashMap<>(); // Preserva a ordem
+        this.paineisTopicos = new LinkedHashMap<>(); // Preserva a ordem
         this.mensagensTopicos = new HashMap<>();
+        this.msgSalva = new HashMap<>();
 
         iniciarComponentes();
         adicionarTopicoGeral();
@@ -127,6 +134,14 @@ public class frmChat extends JFrame {
         // TODO: Encontrar uma fonte melhor
         txfEntrada.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
         txfEntrada.setPreferredSize(new Dimension(905, 30));
+        txfEntrada.addActionListener((e) -> {
+            if (txfEntrada.getText().isBlank()) {
+                return;
+            }
+            JTextArea txaMsg = mensagensTopicos.get(canalAtual);
+            txaMsg.append(nomeExibicao + ": " + txfEntrada.getText() + "\n");
+            txfEntrada.setText("");
+        });
 
         // Emoji
         btnEmoji = new JButton("🌳");
@@ -135,7 +150,7 @@ public class frmChat extends JFrame {
         btnEmoji.addActionListener((e) -> mostrarListaEmojis());
 
         // Enviar
-        JButton btnEnviar = new JButton("Enviar");
+        btnEnviar = new JButton("Enviar");
         btnEnviar.setPreferredSize(new Dimension(75, 30));
 
         pnlEntrada.add(txfEntrada);
@@ -145,6 +160,7 @@ public class frmChat extends JFrame {
     }
 
     private void configurarPainelMensagens() {
+        // Mover para dentro do configurarPainelPrincipal?
         pnlMensagens = new JPanel();
         pnlMensagens.setBorder(BorderFactory.createEtchedBorder());
         pnlMensagens.setMinimumSize(new Dimension(1092, 675));
@@ -152,8 +168,6 @@ public class frmChat extends JFrame {
 
         layoutMensagens = new CardLayout();
         pnlMensagens.setLayout(layoutMensagens);
-
-        // TODO: Adicionar #geral
     }
 
     private void configurarPainelPrincipal() {
@@ -206,16 +220,72 @@ public class frmChat extends JFrame {
         JPanel pnlTopico = new JPanel();
         JLabel lblAba = adicionarAba("#geral", pnlTopico);
 
-        JLabel lblHashtag = new JLabel();
-        lblHashtag.setText("#geral");
+        JPanel pnlDetalhes = new JPanel();
+        Layout layoutDetalhes = new Layout(pnlDetalhes);
+        pnlDetalhes.setPreferredSize(new Dimension(1085, 210));
 
-        pnlTopico.add(lblHashtag);
+        Controle controle = new Controle();
+        List<String> infoTopico = controle.informacoesTopico("#outros");
 
-        topicos.put(lblAba, pnlTopico);
+        int largura = 1085;
+
+        JLabel lblImagem = new JLabel(infoTopico.get(2));
+        lblImagem.setBackground(Color.WHITE);
+        lblImagem.setBorder(BorderFactory.createBevelBorder(0));
+        lblImagem.setPreferredSize(new Dimension(200, 200));
+
+        JLabel lblTitulo = new JLabel(infoTopico.get(0));
+        lblTitulo.setFont(new Font("Segoe UI", Font.PLAIN, 52));
+        lblTitulo.setBackground(Color.white);
+        lblTitulo.setPreferredSize(new Dimension(largura - 200, 50));
+        lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JLabel lblDesc = new JLabel(infoTopico.get(1));
+        lblDesc.setFont(new Font("Segoe UI", Font.PLAIN, 22));
+        lblDesc.setBackground(Color.CYAN);
+        lblDesc.setPreferredSize(new Dimension(largura - 200, 150));
+        lblDesc.setHorizontalAlignment(SwingConstants.CENTER);
+        lblDesc.setVerticalAlignment(SwingConstants.TOP);
+
+        layoutDetalhes.posicionarComponente(lblImagem, 0, 0, 1, 3);
+        layoutDetalhes.posicionarComponente(lblTitulo, 0, 1, 1, 1);
+        layoutDetalhes.posicionarComponente(new JSeparator(), 1, 1, 1, 1);
+        layoutDetalhes.posicionarComponente(lblDesc, 2, 1, 1, 1);
+
+        JPanel pnlMsg = new JPanel();
+        pnlMsg.setPreferredSize(new Dimension(largura, 100));
+        pnlMsg.setBorder(BorderFactory.createSoftBevelBorder(0));
+        
+        JLabel lblUltimasMensagens = new JLabel("Últimas Mensagens");
+        
+        JScrollPane scrollMensagens = new JScrollPane();
+        JTextArea txaMensagens = new JTextArea();
+        txaMensagens.setLineWrap(true);
+        txaMensagens.setWrapStyleWord(true);
+        txaMensagens.setColumns(97);
+        txaMensagens.setRows(3);
+        txaMensagens.setEditable(false);
+        scrollMensagens.setViewportView(txaMensagens);
+        pnlMsg.add(lblUltimasMensagens);
+        pnlMsg.add(scrollMensagens);
+
+        List<String> todasMensagens = controle.todasMensagens("#outros");
+        for (int i = todasMensagens.size() - 3; i < todasMensagens.size(); i++) {
+            String mensagem = todasMensagens.get(i);
+            if (i == todasMensagens.size() - 1) {
+                mensagem = mensagem.strip();
+            }
+            txaMensagens.append(mensagem);
+        }
+
+        pnlTopico.add(pnlDetalhes);
+        pnlTopico.add(pnlMsg);
+
+        paineisTopicos.put(lblAba, pnlTopico);
         pnlMensagens.add(pnlTopico, lblAba.getText());
         atualizarTopicos();
     }
-    
+
     private void adicionarDemaisTopicos() {
         Controle controle = new Controle();
         HashMap<String, Topico> todosTopicos = controle.getTodosTopicos();
@@ -227,15 +297,68 @@ public class frmChat extends JFrame {
     private void adicionarNovoTopico(String hashtag) {
         JPanel pnlTopico = new JPanel();
 
-        JLabel lblHashtag = new JLabel();
-        lblHashtag.setText(hashtag);
+        JPanel pnlDetalhes = new JPanel();
+        Layout layoutDetalhes = new Layout(pnlDetalhes);
+        pnlDetalhes.setPreferredSize(new Dimension(1085, 210));
 
-        pnlTopico.add(lblHashtag);
+        Controle controle = new Controle();
+        List<String> infoTopico = controle.informacoesTopico(hashtag);
+
+        JLabel lblImagem = new JLabel(infoTopico.get(2));
+        lblImagem.setBackground(Color.WHITE);
+        lblImagem.setBorder(BorderFactory.createBevelBorder(0));
+        lblImagem.setPreferredSize(new Dimension(200, 200));
+
+        int largura = 1085;
+
+        JLabel lblTitulo = new JLabel(infoTopico.get(0));
+        lblTitulo.setFont(new Font("Segoe UI", Font.PLAIN, 52));
+        lblTitulo.setBackground(Color.white);
+        lblTitulo.setPreferredSize(new Dimension(largura - 200, 50));
+        lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JLabel lblDesc = new JLabel(infoTopico.get(1));
+        lblDesc.setFont(new Font("Segoe UI", Font.PLAIN, 22));
+        lblDesc.setBackground(Color.CYAN);
+        lblDesc.setPreferredSize(new Dimension(largura - 200, 150));
+        lblDesc.setHorizontalAlignment(SwingConstants.CENTER);
+        lblDesc.setVerticalAlignment(SwingConstants.TOP);
+
+
+        layoutDetalhes.posicionarComponente(lblImagem, 0, 0, 1, 3);
+        layoutDetalhes.posicionarComponente(lblTitulo, 0, 1, 1, 1);
+        layoutDetalhes.posicionarComponente(new JSeparator(), 1, 1, 1, 1);
+        layoutDetalhes.posicionarComponente(lblDesc, 2, 1, 1, 1);
+
+        JPanel pnlMsg = new JPanel();
+        pnlMsg.setPreferredSize(new Dimension(largura, 450));
+        pnlMsg.setBorder(BorderFactory.createSoftBevelBorder(0));
+        JScrollPane scrollMensagens = new JScrollPane();
+        JTextArea txaMensagens = new JTextArea();
+        txaMensagens.setLineWrap(true);
+        txaMensagens.setWrapStyleWord(true);
+        txaMensagens.setColumns(97);
+        txaMensagens.setRows(27);
+        txaMensagens.setEditable(false);
+        scrollMensagens.setViewportView(txaMensagens);
+        pnlMsg.add(scrollMensagens);
+
+        List<String> todasMensagens = controle.todasMensagens(hashtag);
+        for (String mensagem : todasMensagens) {
+            txaMensagens.append(mensagem);
+        }
+
+        mensagensTopicos.put(hashtag, txaMensagens);
+
+        pnlTopico.add(pnlDetalhes);
+        pnlTopico.add(pnlMsg);
 
         JLabel lblAba = adicionarAba(hashtag, pnlTopico);
-        topicos.put(lblAba, pnlTopico);
+        paineisTopicos.put(lblAba, pnlTopico);
         pnlMensagens.add(pnlTopico, lblAba.getText());
         atualizarTopicos();
+
+        msgSalva.put(hashtag, "");
     }
 
     private JLabel adicionarAba(String hashtag, JPanel painel) {
@@ -257,17 +380,38 @@ public class frmChat extends JFrame {
 
         return lbl;
     }
-    
+
     private void mostrarTopico(String hashtag) {
         layoutMensagens.show(pnlMensagens, hashtag);
+        for (JLabel lblTopico : paineisTopicos.keySet()) {
+            if (lblTopico.getText().equals(hashtag)) {
+                lblTopico.setBorder(BorderFactory.createBevelBorder(0));
+            } else {
+                lblTopico.setBorder(BorderFactory.createSoftBevelBorder(0));
+            }
+        }
+        msgSalva.put(canalAtual, txfEntrada.getText());
+        canalAtual = hashtag;
+        txfEntrada.setText(msgSalva.get(canalAtual));
+
+        if (hashtag.equals("#geral")) {
+            txfEntrada.setEnabled(false);
+            btnEnviar.setEnabled(false);
+            btnEmoji.setEnabled(false);
+        } else {
+            txfEntrada.setEnabled(true);
+            btnEnviar.setEnabled(true);
+            btnEmoji.setEnabled(true);
+        }
+
     }
 
     private void atualizarTopicos() {
-        int altura = (topicos.size() + 1) * 30;
+        int altura = (paineisTopicos.size() + 1) * 30;
         pnlTopicos.setPreferredSize(new Dimension(274, altura));
         pnlTopicos.setMinimumSize(new Dimension(274, altura));
 
-        for (Map.Entry<JLabel, JPanel> topico : topicos.entrySet()) {
+        for (Map.Entry<JLabel, JPanel> topico : paineisTopicos.entrySet()) {
             pnlTopicos.add(topico.getKey());
         }
 

@@ -12,6 +12,7 @@ public class Controle {
     static {
         todosTopicos = new HashMap<>();
         todosTopicos.put("#outros", new Topico("outros", "nada demais", ""));
+        todosTopicos.put("#testes", new Topico("testes", "descricao", "img.png"));
     }
     
     public boolean validarConexao(String nome, String ip, String porta) {
@@ -26,6 +27,11 @@ public class Controle {
     public void conectar() {
         // Lógica da conexão
 
+    }
+    
+    public List<String> informacoesTopico(String hashtag) {
+        Topico topico = todosTopicos.get(hashtag);
+        return List.of(topico.getNome(), topico.getDescricao(), topico.getCaminhoFoto());
     }
 
     public List<String> todasMensagens(String hashtag) {
