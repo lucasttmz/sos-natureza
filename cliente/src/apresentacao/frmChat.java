@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -212,7 +214,7 @@ public class frmChat extends JFrame {
 
     private void mostrarListaEmojis() {
         JPopupMenu mnuEmoji = new JPopupMenu();
-        String[] emojis = {"🌍", "🌳", "🌱", "♻️", "🗑️", "🚮", "🛢️", "🔥", "⚠️", "🚨", "🚒", "🧯"};
+        String[] emojis = { "🌍", "🌳", "🌱", "♻️", "🗑️", "🚮", "🛢️", "🔥", "⚠️", "🚨", "🚒", "🧯" };
         JList<String> lstEmoji = new JList<>(emojis);
 
         lstEmoji.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
@@ -452,6 +454,18 @@ public class frmChat extends JFrame {
         } else {
             txfEntrada.setForeground(Color.BLACK);
         }
+
+        // Tira o foco do input ao mudar de canal
+        txfEntrada.setFocusable(false);
+        try {
+            TimeUnit.SECONDS.sleep(1);
+            txfEntrada.setFocusable(true);
+        
+        } catch (InterruptedException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
     }
 
     private void atualizarTopicos() {
