@@ -3,7 +3,9 @@ package apresentacao;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.Insets;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -33,8 +35,13 @@ public class frmInicial extends JFrame {
     }
 
     public void iniciarComponentes() {
+        // Ícone
+        ImageIcon icone = new ImageIcon(getClass().getResource("/resources/icon.png"));
+        setIconImage(icone.getImage());
+        
         // Titulo
         JLabel lblTitulo = new JLabel("SOS Natureza");
+        lblTitulo.setIcon(icone);
         lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
         lblTitulo.setHorizontalTextPosition(SwingConstants.CENTER);
         lblTitulo.setVerticalTextPosition(SwingConstants.BOTTOM);

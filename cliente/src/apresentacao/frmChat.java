@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -70,10 +71,16 @@ public class frmChat extends JFrame {
     }
 
     private void iniciarComponentes() {
+        // Ícone
+        setIconImage(new ImageIcon(getClass().getResource("/resources/icon.png")).getImage());
+        
+        // Configura os paineis
         configurarPainelLateral();
         configurarPainelEntrada();
         configurarPainelMensagens();
         configurarPainelPrincipal();
+        
+        // Inicializa os tópicos
         adicionarTopicoGeral();
         adicionarDemaisTopicos();
         mostrarTopico("#geral");
