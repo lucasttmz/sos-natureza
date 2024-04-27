@@ -460,7 +460,7 @@ public class frmChat extends JFrame {
         try {
             TimeUnit.SECONDS.sleep(1);
             txfEntrada.setFocusable(true);
-        
+
         } catch (InterruptedException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
