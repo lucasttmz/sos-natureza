@@ -37,11 +37,12 @@ public class frmInicial extends JFrame {
     public void iniciarComponentes() {
         // Ícone
         ImageIcon icone = new ImageIcon(getClass().getResource("/resources/icon.png"));
+        ImageIcon logo = new ImageIcon(getClass().getResource("/resources/logo.png"));
         setIconImage(icone.getImage());
         
         // Titulo
-        JLabel lblTitulo = new JLabel("SOS Natureza");
-        lblTitulo.setIcon(icone);
+        JLabel lblTitulo = new JLabel();
+        lblTitulo.setIcon(logo);
         lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
         lblTitulo.setHorizontalTextPosition(SwingConstants.CENTER);
         lblTitulo.setVerticalTextPosition(SwingConstants.BOTTOM);

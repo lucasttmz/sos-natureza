@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -54,12 +55,16 @@ public class frmChat extends JFrame {
     private final Map<String, String> msgSalva;
     private final Map<JLabel, JPanel> paineisTopicos;
     private final Map<String, JTextArea> mensagensTopicos;
+    private ImageIcon icone;
+    
 
     public frmChat(String nome) {
         this.nomeExibicao = nome;
         this.paineisTopicos = new LinkedHashMap<>(); // Preserva a ordem
         this.mensagensTopicos = new HashMap<>();
         this.msgSalva = new HashMap<>();
+        
+        this.icone = new ImageIcon(getClass().getResource("/resources/icon.png"));
 
         iniciarComponentes();
 
@@ -72,7 +77,7 @@ public class frmChat extends JFrame {
 
     private void iniciarComponentes() {
         // Ícone
-        setIconImage(new ImageIcon(getClass().getResource("/resources/icon.png")).getImage());
+        setIconImage(icone.getImage());
         
         // Configura os paineis
         configurarPainelLateral();
@@ -96,6 +101,7 @@ public class frmChat extends JFrame {
 
         // Logo
         JLabel lblLogo = new JLabel("SOS Natureza");
+        lblLogo.setIcon(icone);
         lblLogo.setHorizontalAlignment(SwingConstants.CENTER);
         lblLogo.setHorizontalTextPosition(SwingConstants.CENTER);
         lblLogo.setVerticalTextPosition(SwingConstants.BOTTOM);
@@ -142,7 +148,7 @@ public class frmChat extends JFrame {
         txfEntrada = new JTextField("Digite sua mensagem aqui");
         txfEntrada.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
         txfEntrada.setPreferredSize(new Dimension(905, 30));
-        txfEntrada.setForeground(Color.GRAY);
+        txfEntrada.setForeground(Color.WHITE);
 
         // Envio da mensagem
         txfEntrada.addActionListener((e) -> {
@@ -161,7 +167,7 @@ public class frmChat extends JFrame {
                 if (txfEntrada.getText().equals("Digite sua mensagem aqui")) {
                     txfEntrada.setText("");
                 }
-                txfEntrada.setForeground(Color.BLACK);
+                txfEntrada.setForeground(Color.WHITE);
 
             }
 
@@ -233,7 +239,11 @@ public class frmChat extends JFrame {
             // Espera a seleção senão buga tudo
             if (!e.getValueIsAdjusting()) {
                 String selectedEmoji = lstEmoji.getSelectedValue();
-                txfEntrada.setText(txfEntrada.getText() + selectedEmoji);
+                if (txfEntrada.getText().equals("Digite sua mensagem aqui")){
+                    txfEntrada.setText(selectedEmoji);
+                } else {
+                    txfEntrada.setText(txfEntrada.getText() + selectedEmoji);
+                }
                 mnuEmoji.setVisible(false);
             }
         });
@@ -282,8 +292,8 @@ public class frmChat extends JFrame {
 
             // Imagem do tópico
             JLabel lblImagem = new JLabel(infoTopico.get(2));
-            lblImagem.setBackground(Color.WHITE);
-            lblImagem.setBorder(BorderFactory.createBevelBorder(0));
+           
+            lblImagem.setBorder(BorderFactory.createLineBorder(new Color(26,116,105)));
             lblImagem.setPreferredSize(new Dimension(tamanhoImagem, tamanhoImagem));
 
             layoutDetalhes.posicionarComponente(lblImagem, 0, 0, 1, 3);
@@ -300,6 +310,7 @@ public class frmChat extends JFrame {
             // Mensagens do tópico
             JScrollPane scrollMensagens = new JScrollPane();
             JTextArea txaMensagens = new JTextArea();
+            txaMensagens.setFocusable(false);
             txaMensagens.setLineWrap(true);
             txaMensagens.setWrapStyleWord(true);
             txaMensagens.setColumns(97);
@@ -384,6 +395,7 @@ public class frmChat extends JFrame {
         // Mensagens do tópico
         JScrollPane scrollMensagens = new JScrollPane();
         JTextArea txaMensagens = new JTextArea();
+        txaMensagens.setFocusable(false);
         txaMensagens.setLineWrap(true);
         txaMensagens.setWrapStyleWord(true);
         txaMensagens.setColumns(97);
@@ -465,7 +477,7 @@ public class frmChat extends JFrame {
         // Tira o foco do input ao mudar de canal
         txfEntrada.setFocusable(false);
         try {
-            TimeUnit.SECONDS.sleep(1);
+            TimeUnit.MILLISECONDS.sleep(1);
             txfEntrada.setFocusable(true);
 
         } catch (InterruptedException e1) {

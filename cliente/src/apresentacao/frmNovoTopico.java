@@ -26,7 +26,7 @@ public class frmNovoTopico extends JDialog {
     public frmNovoTopico() {
         this.setTitle("Criar novo tópico");
         this.setModal(true);
-        this.setSize(400, 350);
+        this.setSize(400, 370);
         this.setLocationRelativeTo(null);
         this.setResizable(false);
 
@@ -37,32 +37,32 @@ public class frmNovoTopico extends JDialog {
         // Nome do tópico
         JLabel lblNome = new JLabel("Nome do tópico");
         txfNome = new JTextField();
-        txfNome.setPreferredSize(new Dimension(350, 25));
+        txfNome.setPreferredSize(new Dimension(350, 30));
 
         // Descrição do tópico
         JLabel lblDesc = new JLabel("Descrição do tópico");
         txaDesc = new JTextArea();
         txaDesc.setLineWrap(true);
         txaDesc.setWrapStyleWord(true);
-        txaDesc.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        txaDesc.setBorder(BorderFactory.createLineBorder(new Color(29,62,48)));
         txaDesc.setPreferredSize(new Dimension(350, 75));
 
         // Foto
         JLabel lblFoto = new JLabel("Foto");
         txfFoto = new JTextField();
-        txfFoto.setPreferredSize(new Dimension(350, 25));
+        txfFoto.setPreferredSize(new Dimension(350, 30));
 
         // Botão Criar
         JButton btnCriar = new JButton("Criar");
         btnCriar.addActionListener(e -> criarTopico());
-        btnCriar.setPreferredSize(new Dimension(160, 25));
+        btnCriar.setPreferredSize(new Dimension(160, 30));
         btnCriar.setHorizontalAlignment(SwingConstants.CENTER);
         btnCriar.setHorizontalTextPosition(SwingConstants.CENTER);
 
         // Botão Cancelar
         JButton btnCancelar = new JButton("Cancelar");
         btnCancelar.addActionListener(e -> dispose());
-        btnCancelar.setPreferredSize(new Dimension(160, 25));
+        btnCancelar.setPreferredSize(new Dimension(160, 30));
         btnCancelar.setHorizontalAlignment(SwingConstants.CENTER);
         btnCancelar.setHorizontalTextPosition(SwingConstants.CENTER);
 
