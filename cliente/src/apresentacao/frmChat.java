@@ -50,7 +50,6 @@ public class frmChat extends JFrame {
     private Layout layoutChat;
     private CardLayout layoutMensagens;
 
-    private String canalAtual = "#geral"; // Mover para o modelo
     private final Map<String, String> msgSalva;
     private final Map<JLabel, JPanel> paineisTopicos;
     private final Map<String, JTextArea> mensagensTopicos;
@@ -146,14 +145,7 @@ public class frmChat extends JFrame {
         txfEntrada.setForeground(Color.WHITE);
 
         // Envio da mensagem
-        txfEntrada.addActionListener((e) -> {
-            if (txfEntrada.getText().isBlank()) {
-                return;
-            }
-            JTextArea txaMsg = mensagensTopicos.get(canalAtual);
-            txaMsg.append(controle.getNomeExibicao() + ": " + txfEntrada.getText() + "\n");
-            txfEntrada.setText("");
-        });
+        txfEntrada.addActionListener((e) -> enviarMensagem());
 
         // Placeholder da mensagem
         txfEntrada.addFocusListener(new FocusListener() {
@@ -249,6 +241,34 @@ public class frmChat extends JFrame {
         mnuEmoji.show(btnEmoji, x, y);
     }
 
+    private void enviarMensagem() {
+        if (txfEntrada.getText().isBlank()) {
+            return;
+        }
+
+        // Temporário
+        adicionarMensagem(controle.getCanalAtual(), controle.getNomeExibicao() + ": " + txfEntrada.getText() + "\n");
+
+        txfEntrada.setText("");
+    }
+
+    public void adicionarMensagem(String canal, String mensagem) {
+        // Mensagem no canal
+        JTextArea txaMsg = mensagensTopicos.get(canal);
+        txaMsg.append(mensagem);
+        
+        // Mensagem no #geral
+        JTextArea txaMsgGeral = mensagensTopicos.get(canal + "_geral");
+        String[] linhas = txaMsgGeral.getText().split("\n");
+        txaMsgGeral.setText("");
+        for (int i = 1; i < linhas.length; i++) {
+            String linha = linhas[i];
+            txaMsgGeral.append(linha +"\n");
+            
+        }
+        txaMsgGeral.append(mensagem.strip());
+    }
+
     private List<JPanel> criarNovoTopicoGeral(List<String> infoTopico) {
         final int larguraMaxima = 1085;
         final int tamanhoImagem = 200;
@@ -275,9 +295,13 @@ public class frmChat extends JFrame {
 
         // Imagem do tópico
         JLabel lblImagem = new JLabel(infoTopico.get(2));
-
-        lblImagem.setBorder(BorderFactory.createBevelBorder(0));
         lblImagem.setPreferredSize(new Dimension(tamanhoImagem, tamanhoImagem));
+        if (!infoTopico.get(2).isEmpty()) {
+            lblImagem.setBorder(BorderFactory.createBevelBorder(0));
+            lblImagem.setVerticalTextPosition(SwingConstants.BOTTOM);
+            lblImagem.setHorizontalTextPosition(SwingConstants.CENTER);
+            lblImagem.setHorizontalAlignment(SwingConstants.CENTER);
+        }
 
         layoutDetalhes.posicionarComponente(lblImagem, 0, 0, 1, 3);
         layoutDetalhes.posicionarComponente(lblTitulo, 0, 1, 1, 1);
@@ -311,6 +335,8 @@ public class frmChat extends JFrame {
             }
             txaMensagens.append(mensagem);
         }
+        
+        mensagensTopicos.put(infoTopico.get(3) + "_geral", txaMensagens);
 
         return List.of(pnlDetalhes, pnlMsg);
 
@@ -330,7 +356,7 @@ public class frmChat extends JFrame {
         atualizarTopicos();
     }
 
-    private void adicionarNovoTopico(String hashtag) {
+    public void adicionarNovoTopico(String hashtag) {
         JPanel pnlTopico = new JPanel();
         JLabel lblAba = adicionarAba(hashtag);
 
@@ -360,8 +386,13 @@ public class frmChat extends JFrame {
 
         // Imagem do tópico
         JLabel lblImagem = new JLabel(infoTopico.get(2));
-        lblImagem.setBorder(BorderFactory.createBevelBorder(0));
         lblImagem.setPreferredSize(new Dimension(tamanhoImagem, 200));
+        if (!infoTopico.get(2).isEmpty()) {
+            lblImagem.setBorder(BorderFactory.createBevelBorder(0));
+            lblImagem.setVerticalTextPosition(SwingConstants.BOTTOM);
+            lblImagem.setHorizontalTextPosition(SwingConstants.CENTER);
+            lblImagem.setHorizontalAlignment(SwingConstants.CENTER);
+        }
 
         layoutDetalhes.posicionarComponente(lblImagem, 0, 0, 1, 3);
         layoutDetalhes.posicionarComponente(lblTitulo, 0, 1, 1, 1);
@@ -400,7 +431,7 @@ public class frmChat extends JFrame {
         // Salva o estado do lado do cliente
         mensagensTopicos.put(hashtag, txaMensagens);
         msgSalva.put(hashtag, "");
-        
+
         List<JPanel> novoTopico = criarNovoTopicoGeral(controle.informacoesTopico(hashtag));
         pnlTopicoGeral.add(novoTopico.get(0));
         pnlTopicoGeral.add(novoTopico.get(1));
@@ -436,9 +467,9 @@ public class frmChat extends JFrame {
                 lblTopico.setBorder(BorderFactory.createSoftBevelBorder(0));
             }
         }
-        msgSalva.put(canalAtual, txfEntrada.getText());
-        canalAtual = hashtag;
-        txfEntrada.setText(msgSalva.get(canalAtual));
+        msgSalva.put(controle.getCanalAtual(), txfEntrada.getText());
+        controle.setCanalAtual(hashtag);
+        txfEntrada.setText(msgSalva.get(controle.getCanalAtual()));
 
         if (hashtag.equals("#geral")) {
             txfEntrada.setText("Não é possível enviar mensagens no #geral");

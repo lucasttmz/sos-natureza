@@ -7,13 +7,16 @@ import java.util.stream.Collectors;
 
 public class Controle {
 
-    private static final HashMap<String, Topico> todosTopicos;
-    private frmChat frmC;
+    private String canalAtual;
     private String nomeExibicao;
     private String mensagem;
 
+    private static HashMap<String, Topico> todosTopicos;
+    private frmChat frmC;
+
     // Temporário enquanto não utilizar os tópicos do servidor
-    static {
+    public Controle() {
+        canalAtual = "#geral";
         todosTopicos = new HashMap<>();
         todosTopicos.put("#outros", new Topico("outros", "nada demais", ""));
         todosTopicos.put("#testes", new Topico("testes", "descricao", "img.png"));
@@ -73,8 +76,17 @@ public class Controle {
     public String getMensagem() {
         return mensagem;
     }
-    
+
     public String getNomeExibicao() {
         return nomeExibicao;
     }
+
+    public String getCanalAtual() {
+        return canalAtual;
+    }
+
+    public void setCanalAtual(String canalAtual) {
+        this.canalAtual = canalAtual;
+    }
+
 }
