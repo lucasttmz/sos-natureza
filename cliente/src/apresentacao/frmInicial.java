@@ -108,7 +108,7 @@ public class frmInicial extends JFrame {
     private void conectar() {
         Controle controle = new Controle();
         if (controle.validarConexao(txfNome.getText(), txfIP.getText(), txfPorta.getText())) {
-            controle.conectar(txfNome.getText());
+            controle.conectar(txfNome.getText(), txfIP.getText(), Integer.parseInt(txfPorta.getText()));
             if (controle.getMensagem().isEmpty()) {
                 this.dispose();
             } else {

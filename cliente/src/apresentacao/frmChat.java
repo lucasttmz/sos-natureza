@@ -15,7 +15,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -246,27 +245,25 @@ public class frmChat extends JFrame {
             return;
         }
 
-        // Temporário
-        adicionarMensagem(controle.getCanalAtual(), controle.getNomeExibicao() + ": " + txfEntrada.getText() + "\n");
-
+        controle.enviarMensagem(txfEntrada.getText() + "\n");
         txfEntrada.setText("");
     }
 
-    public void adicionarMensagem(String canal, String mensagem) {
+    public void adicionarMensagem(String usuario, String canal, String mensagem) {
         // Mensagem no canal
         JTextArea txaMsg = mensagensTopicos.get(canal);
-        txaMsg.append(mensagem);
-        
+        txaMsg.append(usuario + ": " + mensagem);
+
         // Mensagem no #geral
         JTextArea txaMsgGeral = mensagensTopicos.get(canal + "_geral");
         String[] linhas = txaMsgGeral.getText().split("\n");
         txaMsgGeral.setText("");
         for (int i = 1; i < linhas.length; i++) {
             String linha = linhas[i];
-            txaMsgGeral.append(linha +"\n");
-            
+            txaMsgGeral.append(linha + "\n");
+
         }
-        txaMsgGeral.append(mensagem.strip());
+        txaMsgGeral.append(usuario + ": " + mensagem.strip());
     }
 
     private List<JPanel> criarNovoTopicoGeral(List<String> infoTopico) {
@@ -335,7 +332,7 @@ public class frmChat extends JFrame {
             }
             txaMensagens.append(mensagem);
         }
-        
+
         mensagensTopicos.put(infoTopico.get(3) + "_geral", txaMensagens);
 
         return List.of(pnlDetalhes, pnlMsg);
