@@ -1,6 +1,7 @@
 package modelo;
 
 import apresentacao.frmChat;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,6 +13,8 @@ public class Controle {
     private String mensagem;
 
     private static HashMap<String, Topico> todosTopicos;
+    private List<Mensagem> mensagensPendentes; // TODO
+    private Cliente cliente;
     private frmChat frmC;
 
     // Temporário enquanto não utilizar os tópicos do servidor
@@ -31,11 +34,31 @@ public class Controle {
         return sucesso;
     }
 
-    public void conectar(String nome) {
+    public void conectar(String nome, String ip, int porta) {
         this.mensagem = "";
         this.nomeExibicao = nome;
-        frmC = new frmChat(this); // TODO: Remover o nome daqui;
-        frmC.setVisible(true);
+        this.cliente = new Cliente(this);
+
+        try {
+            this.cliente.conectar(ip, porta);
+            this.frmC = new frmChat(this);
+            this.frmC.setVisible(true);
+        } catch (IOException ex) {
+            this.mensagem = "Erro ao conectar com o servidor!";
+        }
+    }
+
+    public void enviarMensagem(String mensagem) {
+        Mensagem msg = new Mensagem(this.nomeExibicao, canalAtual, mensagem);
+        try {
+            cliente.enviarMensagem(msg);
+        } catch (IOException | ClassNotFoundException ex) {
+            System.out.println("Erro ao enviar mensagem");
+        }
+    }
+
+    public void mostrarMensagem(String usuario, String canal, String mensagem) {
+        frmC.adicionarMensagem(usuario, canal, mensagem);
     }
 
     public List<String> informacoesTopico(String hashtag) {

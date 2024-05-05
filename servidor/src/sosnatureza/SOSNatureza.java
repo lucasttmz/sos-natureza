@@ -1,4 +1,4 @@
-package servidor;
+package sosnatureza;
 
 import modelo.Servidor;
 

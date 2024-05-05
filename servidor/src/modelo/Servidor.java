@@ -11,7 +11,7 @@ import java.util.List;
 public class Servidor {
 
     private final List<ObjectOutputStream> clientesConectados = new ArrayList<>();
-    private final List<String> todasMensagens = new ArrayList<>();
+    private final List<Mensagem> todasMensagens = new ArrayList<>();
     private ServerSocket servidor;
 
     public void iniciar() {
@@ -21,7 +21,6 @@ public class Servidor {
 
             while (true) {
                 Socket cliente = servidor.accept();
-                System.out.println("123");
                 System.out.println("Cliente conectado: " + cliente.getInetAddress().getHostAddress());
                 Thread thread = new Thread(new ThreadCliente(cliente));
                 thread.start();
@@ -49,36 +48,44 @@ public class Servidor {
                 saida = new ObjectOutputStream(socket.getOutputStream());
                 entrada = new ObjectInputStream(socket.getInputStream());
                 clientesConectados.add(saida);
-                
-                for (String msg : todasMensagens) {
-                    saida.writeObject(msg);
-                }
+
+                // TODO: Sincronizar as mensagens
+//                for (Mensagem msg : todasMensagens) {
+//                    saida.writeObject(msg);
+//                }
 
                 while (true) {
-                    String resposta = String.valueOf(entrada.readObject());
-                    System.out.println("3");
-                    System.out.println("Mensagem recebida:" + resposta);
-                    todasMensagens.add(resposta);
+                    Object recebido = entrada.readObject();
 
-                    List<ObjectOutputStream> remover = new ArrayList<>();
+                    System.out.print("Mensagem recebida: " + recebido);
+
+                    if (recebido instanceof Mensagem) {
+                        todasMensagens.add((Mensagem) recebido);
+                    } else {
+                        System.err.println("Tipo não reconhecido");
+                    }
+
+                    List<ObjectOutputStream> clientesDesconectados = new ArrayList<>();
                     for (ObjectOutputStream cliente : clientesConectados) {
                         try {
                             cliente.flush();
-                            cliente.writeObject(resposta);
+                            cliente.writeObject(recebido);
+                            System.out.print("Mensagem enviada: " + recebido);
                         } catch (IOException ex) {
-                            System.out.println("Cliente desconectado");
-                            remover.add(cliente);
+                            clientesDesconectados.add(cliente);
                         }
                     }
-                    
-                    for (ObjectOutputStream r : remover) {
-                        clientesConectados.remove(r);
+
+                    for (ObjectOutputStream cliente : clientesDesconectados) {
+                        clientesConectados.remove(cliente);
                     }
 
                 }
 
-            } catch (IOException | ClassNotFoundException ex) {
-                System.err.println(ex);
+            } catch (IOException ex) {
+                System.out.println("Cliente desconectado");
+            } catch (ClassNotFoundException ex) {
+                System.err.println("Erro na leitura do objeto serializado: " + ex);
             }
         }
 
