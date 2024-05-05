@@ -1,5 +1,6 @@
 package modelo;
 
+import apresentacao.frmChat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -7,6 +8,8 @@ import java.util.stream.Collectors;
 public class Controle {
 
     private static final HashMap<String, Topico> todosTopicos;
+    private frmChat frmC;
+    private String nomeExibicao;
     private String mensagem;
 
     // Temporário enquanto não utilizar os tópicos do servidor
@@ -25,9 +28,11 @@ public class Controle {
         return sucesso;
     }
 
-    public void conectar() {
-        // Lógica da conexão
-
+    public void conectar(String nome) {
+        this.mensagem = "";
+        this.nomeExibicao = nome;
+        frmC = new frmChat(this); // TODO: Remover o nome daqui;
+        frmC.setVisible(true);
     }
 
     public List<String> informacoesTopico(String hashtag) {
@@ -67,5 +72,9 @@ public class Controle {
 
     public String getMensagem() {
         return mensagem;
+    }
+    
+    public String getNomeExibicao() {
+        return nomeExibicao;
     }
 }

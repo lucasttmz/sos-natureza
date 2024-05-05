@@ -3,7 +3,6 @@ package apresentacao;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Image;
 import java.awt.Insets;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -39,7 +38,7 @@ public class frmInicial extends JFrame {
         ImageIcon icone = new ImageIcon(getClass().getResource("/resources/icon.png"));
         ImageIcon logo = new ImageIcon(getClass().getResource("/resources/logo.png"));
         setIconImage(icone.getImage());
-        
+
         // Titulo
         JLabel lblTitulo = new JLabel();
         lblTitulo.setIcon(logo);
@@ -109,10 +108,18 @@ public class frmInicial extends JFrame {
     private void conectar() {
         Controle controle = new Controle();
         if (controle.validarConexao(txfNome.getText(), txfIP.getText(), txfPorta.getText())) {
-            // TODO: Mover para controle em uma única chamada de função
-            frmChat frmC = new frmChat(txfNome.getText());
-            frmC.setVisible(true);
-            this.dispose();
+            controle.conectar(txfNome.getText());
+            if (controle.getMensagem().isEmpty()) {
+                this.dispose();
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        controle.getMensagem(),
+                        "Erro de conexão",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
+
         } else {
             JOptionPane.showMessageDialog(
                     this,

@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -45,25 +44,25 @@ public class frmChat extends JFrame {
     private JPanel pnlMensagens;
     private JPanel pnlEntrada;
     private JPanel pnlTopicos;
+    private JPanel pnlTopicoGeral;
     private Layout layoutPrincipal;
     private Layout layoutLateral;
     private Layout layoutChat;
     private CardLayout layoutMensagens;
 
     private String canalAtual = "#geral"; // Mover para o modelo
-    private final String nomeExibicao;
     private final Map<String, String> msgSalva;
     private final Map<JLabel, JPanel> paineisTopicos;
     private final Map<String, JTextArea> mensagensTopicos;
-    private ImageIcon icone;
-    
+    private final Controle controle;
+    private final ImageIcon icone;
 
-    public frmChat(String nome) {
-        this.nomeExibicao = nome;
+    public frmChat(Controle controle) {
+        this.controle = controle;
         this.paineisTopicos = new LinkedHashMap<>(); // Preserva a ordem
         this.mensagensTopicos = new HashMap<>();
         this.msgSalva = new HashMap<>();
-        
+
         this.icone = new ImageIcon(getClass().getResource("/resources/icon.png"));
 
         iniciarComponentes();
@@ -78,16 +77,19 @@ public class frmChat extends JFrame {
     private void iniciarComponentes() {
         // Ícone
         setIconImage(icone.getImage());
-        
+
         // Configura os paineis
         configurarPainelLateral();
         configurarPainelEntrada();
         configurarPainelMensagens();
         configurarPainelPrincipal();
-        
+
         // Inicializa os tópicos
         adicionarTopicoGeral();
-        adicionarDemaisTopicos();
+        for (List<String> topico : controle.getTodosTopicos()) {
+            adicionarNovoTopico(topico.get(3));
+        }
+
         mostrarTopico("#geral");
     }
 
@@ -115,14 +117,7 @@ public class frmChat extends JFrame {
 
         // Criar tópico
         JButton btnCriarTopico = new JButton("Criar Novo Tópico");
-        btnCriarTopico.addActionListener((e) -> {
-            frmNovoTopico frmNT = new frmNovoTopico();
-            frmNT.setVisible(true);
-            frmNT.getHashtag().ifPresent((hashtag) -> {
-                adicionarNovoTopico(hashtag);
-                revalidate();
-            });
-        });
+        btnCriarTopico.addActionListener((e) -> criarNovoTopico());
         btnCriarTopico.setPreferredSize(new Dimension(135, 25));
         btnCriarTopico.setHorizontalAlignment(SwingConstants.LEFT);
         btnCriarTopico.setHorizontalTextPosition(SwingConstants.LEFT);
@@ -156,7 +151,7 @@ public class frmChat extends JFrame {
                 return;
             }
             JTextArea txaMsg = mensagensTopicos.get(canalAtual);
-            txaMsg.append(nomeExibicao + ": " + txfEntrada.getText() + "\n");
+            txaMsg.append(controle.getNomeExibicao() + ": " + txfEntrada.getText() + "\n");
             txfEntrada.setText("");
         });
 
@@ -227,7 +222,7 @@ public class frmChat extends JFrame {
 
     private void mostrarListaEmojis() {
         JPopupMenu mnuEmoji = new JPopupMenu();
-        String[] emojis = { "🌍", "🌳", "🌱", "♻️", "🗑️", "🚮", "🛢️", "🔥", "⚠️", "🚨", "🚒", "🧯" };
+        String[] emojis = {"🌍", "🌳", "🌱", "♻️", "🗑️", "🚮", "🛢️", "🔥", "⚠️", "🚨", "🚒", "🧯"};
         JList<String> lstEmoji = new JList<>(emojis);
 
         lstEmoji.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
@@ -236,16 +231,13 @@ public class frmChat extends JFrame {
         lstEmoji.setVisibleRowCount(3);
 
         lstEmoji.addListSelectionListener(e -> {
-            // Espera a seleção senão buga tudo
-            if (!e.getValueIsAdjusting()) {
-                String selectedEmoji = lstEmoji.getSelectedValue();
-                if (txfEntrada.getText().equals("Digite sua mensagem aqui")){
-                    txfEntrada.setText(selectedEmoji);
-                } else {
-                    txfEntrada.setText(txfEntrada.getText() + selectedEmoji);
-                }
-                mnuEmoji.setVisible(false);
+            String selectedEmoji = lstEmoji.getSelectedValue();
+            if (txfEntrada.getText().equals("Digite sua mensagem aqui")) {
+                txfEntrada.setText(selectedEmoji);
+            } else {
+                txfEntrada.setText(txfEntrada.getText() + selectedEmoji);
             }
+            mnuEmoji.setVisible(false);
         });
 
         JScrollPane pnlEmojis = new JScrollPane(lstEmoji);
@@ -257,103 +249,93 @@ public class frmChat extends JFrame {
         mnuEmoji.show(btnEmoji, x, y);
     }
 
-    private void adicionarTopicoGeral() {
-        JPanel pnlTopico = new JPanel();
-        pnlTopico.setLayout(new BoxLayout(pnlTopico, BoxLayout.Y_AXIS));
-        JScrollPane scrollTopicos = new JScrollPane(pnlTopico);
-        scrollTopicos.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-        scrollTopicos.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        JLabel lblAba = adicionarAba("#geral", pnlTopico);
-
+    private List<JPanel> criarNovoTopicoGeral(List<String> infoTopico) {
         final int larguraMaxima = 1085;
         final int tamanhoImagem = 200;
-        Controle controle = new Controle();
 
-        for (List<String> infoTopico : controle.getTodosTopicos()) {
-            JPanel pnlDetalhes = new JPanel();
-            Layout layoutDetalhes = new Layout(pnlDetalhes);
-            pnlDetalhes.setPreferredSize(new Dimension(larguraMaxima, tamanhoImagem + 10));
-            pnlDetalhes.setMaximumSize(new Dimension(larguraMaxima, tamanhoImagem + 10));
+        JPanel pnlDetalhes = new JPanel();
+        Layout layoutDetalhes = new Layout(pnlDetalhes);
+        pnlDetalhes.setPreferredSize(new Dimension(larguraMaxima, tamanhoImagem + 10));
+        pnlDetalhes.setMaximumSize(new Dimension(larguraMaxima, tamanhoImagem + 10));
 
-            // Título do tópico
-            JLabel lblTitulo = new JLabel(infoTopico.get(0));
-            lblTitulo.setFont(new Font("Segoe UI", Font.PLAIN, 52));
-            lblTitulo.setBackground(Color.white);
-            lblTitulo.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 50));
-            lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
+        // Título do tópico
+        JLabel lblTitulo = new JLabel(infoTopico.get(0));
+        lblTitulo.setFont(new Font("Segoe UI", Font.PLAIN, 52));
+        lblTitulo.setBackground(Color.white);
+        lblTitulo.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 50));
+        lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
 
-            // Descrição do tópico
-            JLabel lblDesc = new JLabel(infoTopico.get(1));
-            lblDesc.setFont(new Font("Segoe UI", Font.PLAIN, 22));
-            lblDesc.setBackground(Color.CYAN);
-            lblDesc.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 150));
-            lblDesc.setHorizontalAlignment(SwingConstants.CENTER);
-            lblDesc.setVerticalAlignment(SwingConstants.TOP);
+        // Descrição do tópico
+        JLabel lblDesc = new JLabel(infoTopico.get(1));
+        lblDesc.setFont(new Font("Segoe UI", Font.PLAIN, 22));
+        lblDesc.setBackground(Color.CYAN);
+        lblDesc.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 150));
+        lblDesc.setHorizontalAlignment(SwingConstants.CENTER);
+        lblDesc.setVerticalAlignment(SwingConstants.TOP);
 
-            // Imagem do tópico
-            JLabel lblImagem = new JLabel(infoTopico.get(2));
-           
-            lblImagem.setBorder(BorderFactory.createLineBorder(new Color(26,116,105)));
-            lblImagem.setPreferredSize(new Dimension(tamanhoImagem, tamanhoImagem));
+        // Imagem do tópico
+        JLabel lblImagem = new JLabel(infoTopico.get(2));
 
-            layoutDetalhes.posicionarComponente(lblImagem, 0, 0, 1, 3);
-            layoutDetalhes.posicionarComponente(lblTitulo, 0, 1, 1, 1);
-            layoutDetalhes.posicionarComponente(new JSeparator(), 1, 1, 1, 1);
-            layoutDetalhes.posicionarComponente(lblDesc, 2, 1, 1, 1);
+        lblImagem.setBorder(BorderFactory.createBevelBorder(0));
+        lblImagem.setPreferredSize(new Dimension(tamanhoImagem, tamanhoImagem));
 
-            // Painel mensagens
-            JPanel pnlMsg = new JPanel();
-            pnlMsg.setPreferredSize(new Dimension(larguraMaxima, 70));
-            pnlMsg.setMaximumSize(new Dimension(larguraMaxima, 70));
-            pnlMsg.setBorder(BorderFactory.createSoftBevelBorder(0));
+        layoutDetalhes.posicionarComponente(lblImagem, 0, 0, 1, 3);
+        layoutDetalhes.posicionarComponente(lblTitulo, 0, 1, 1, 1);
+        layoutDetalhes.posicionarComponente(new JSeparator(), 1, 1, 1, 1);
+        layoutDetalhes.posicionarComponente(lblDesc, 2, 1, 1, 1);
 
-            // Mensagens do tópico
-            JScrollPane scrollMensagens = new JScrollPane();
-            JTextArea txaMensagens = new JTextArea();
-            txaMensagens.setFocusable(false);
-            txaMensagens.setLineWrap(true);
-            txaMensagens.setWrapStyleWord(true);
-            txaMensagens.setColumns(97);
-            txaMensagens.setRows(3);
-            txaMensagens.setEditable(false);
-            scrollMensagens.setViewportView(txaMensagens);
-            pnlMsg.add(scrollMensagens);
+        // Painel mensagens
+        JPanel pnlMsg = new JPanel();
+        pnlMsg.setPreferredSize(new Dimension(larguraMaxima, 70));
+        pnlMsg.setMaximumSize(new Dimension(larguraMaxima, 70));
+        pnlMsg.setBorder(BorderFactory.createSoftBevelBorder(0));
 
-            // Mostra apenas as três últimas mensagens
-            List<String> todasMensagens = controle.todasMensagens(infoTopico.get(3));
-            for (int i = todasMensagens.size() - 3; i < todasMensagens.size(); i++) {
-                String mensagem = todasMensagens.get(i);
-                if (i == todasMensagens.size() - 1) {
-                    mensagem = mensagem.strip();
-                }
-                txaMensagens.append(mensagem);
+        // Mensagens do tópico
+        JScrollPane scrollMensagens = new JScrollPane();
+        JTextArea txaMensagens = new JTextArea();
+        txaMensagens.setFocusable(false);
+        txaMensagens.setLineWrap(true);
+        txaMensagens.setWrapStyleWord(true);
+        txaMensagens.setColumns(97);
+        txaMensagens.setRows(3);
+        txaMensagens.setEditable(false);
+        scrollMensagens.setViewportView(txaMensagens);
+        pnlMsg.add(scrollMensagens);
+
+        // Mostra apenas as três últimas mensagens
+        List<String> todasMensagens = controle.todasMensagens(infoTopico.get(3));
+        for (int i = todasMensagens.size() - 3; i < todasMensagens.size(); i++) {
+            String mensagem = todasMensagens.get(i);
+            if (i == todasMensagens.size() - 1) {
+                mensagem = mensagem.strip();
             }
-
-            // Adiciona o tópico
-            pnlTopico.add(pnlDetalhes);
-            pnlTopico.add(pnlMsg);
+            txaMensagens.append(mensagem);
         }
 
+        return List.of(pnlDetalhes, pnlMsg);
+
+    }
+
+    private void adicionarTopicoGeral() {
+        pnlTopicoGeral = new JPanel();
+        pnlTopicoGeral.setLayout(new BoxLayout(pnlTopicoGeral, BoxLayout.Y_AXIS));
+        JScrollPane scrollTopicos = new JScrollPane(pnlTopicoGeral);
+        scrollTopicos.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        scrollTopicos.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        JLabel lblAba = adicionarAba("#geral");
+
         // Salva o estado do #geral
-        paineisTopicos.put(lblAba, pnlTopico);
+        paineisTopicos.put(lblAba, pnlTopicoGeral);
         pnlMensagens.add(scrollTopicos, lblAba.getText());
         atualizarTopicos();
     }
 
-    private void adicionarDemaisTopicos() {
-        Controle controle = new Controle();
-        for (List<String> topico : controle.getTodosTopicos()) {
-            adicionarNovoTopico(topico.get(3));
-        }
-    }
-
     private void adicionarNovoTopico(String hashtag) {
         JPanel pnlTopico = new JPanel();
-        JLabel lblAba = adicionarAba(hashtag, pnlTopico);
+        JLabel lblAba = adicionarAba(hashtag);
 
         final int larguraMaxima = 1085;
         final int tamanhoImagem = 200;
-        Controle controle = new Controle();
         List<String> infoTopico = controle.informacoesTopico(hashtag);
 
         // Painel dos detalhes do tópico
@@ -378,7 +360,6 @@ public class frmChat extends JFrame {
 
         // Imagem do tópico
         JLabel lblImagem = new JLabel(infoTopico.get(2));
-        lblImagem.setBackground(Color.WHITE);
         lblImagem.setBorder(BorderFactory.createBevelBorder(0));
         lblImagem.setPreferredSize(new Dimension(tamanhoImagem, 200));
 
@@ -419,10 +400,14 @@ public class frmChat extends JFrame {
         // Salva o estado do lado do cliente
         mensagensTopicos.put(hashtag, txaMensagens);
         msgSalva.put(hashtag, "");
+        
+        List<JPanel> novoTopico = criarNovoTopicoGeral(controle.informacoesTopico(hashtag));
+        pnlTopicoGeral.add(novoTopico.get(0));
+        pnlTopicoGeral.add(novoTopico.get(1));
+        revalidate();
     }
 
-    // TODO: o painel não está sendo usado, retirar depois
-    private JLabel adicionarAba(String hashtag, JPanel painel) {
+    private JLabel adicionarAba(String hashtag) {
         JLabel lbl = new JLabel(hashtag);
         lbl.setBorder(BorderFactory.createSoftBevelBorder(0));
         lbl.setPreferredSize(new Dimension(274, 25));
@@ -479,10 +464,7 @@ public class frmChat extends JFrame {
         try {
             TimeUnit.MILLISECONDS.sleep(1);
             txfEntrada.setFocusable(true);
-
         } catch (InterruptedException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
         }
 
     }
@@ -498,9 +480,11 @@ public class frmChat extends JFrame {
 
     }
 
-    // Temporario para não ter que digitar o ip toda vez que for testar
-    public static void main(String[] args) {
-        frmChat frmChat = new frmChat("teste");
-        frmChat.setVisible(true);
+    private void criarNovoTopico() {
+        frmNovoTopico frmNT = new frmNovoTopico();
+        frmNT.setVisible(true);
+        frmNT.getHashtag().ifPresent((hashtag) -> {
+            adicionarNovoTopico(hashtag);
+        });
     }
 }
