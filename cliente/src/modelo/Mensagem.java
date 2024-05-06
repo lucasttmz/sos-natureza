@@ -28,7 +28,7 @@ public class Mensagem implements Serializable {
 
     @Override
     public String toString() {
-        return this.getUsuario() + ": " + this.getMensagem();
+        return "<" + this.getCanal() + "> " + this.getUsuario() + ": " + this.getMensagem();
     }
 
 }

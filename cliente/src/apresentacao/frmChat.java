@@ -325,14 +325,15 @@ public class frmChat extends JFrame {
 
         // Mostra apenas as três últimas mensagens
         List<String> todasMensagens = controle.todasMensagens(infoTopico.get(3));
-        for (int i = todasMensagens.size() - 3; i < todasMensagens.size(); i++) {
-            String mensagem = todasMensagens.get(i);
-            if (i == todasMensagens.size() - 1) {
-                mensagem = mensagem.strip();
+        if (!todasMensagens.isEmpty()) {
+            for (int i = todasMensagens.size() - 3; i < todasMensagens.size(); i++) {
+                String mensagem = todasMensagens.get(i);
+                if (i == todasMensagens.size() - 1) {
+                    mensagem = mensagem.strip();
+                }
+                txaMensagens.append(mensagem);
             }
-            txaMensagens.append(mensagem);
         }
-
         mensagensTopicos.put(infoTopico.get(3) + "_geral", txaMensagens);
 
         return List.of(pnlDetalhes, pnlMsg);

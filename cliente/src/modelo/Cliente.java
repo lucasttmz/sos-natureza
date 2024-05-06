@@ -21,7 +21,7 @@ public class Cliente {
         entrada = new ObjectInputStream(cliente.getInputStream());
         saida = new ObjectOutputStream(cliente.getOutputStream());
 
-        Thread thread = new Thread(new RecebimentoDeMensagens(entrada));
+        Thread thread = new Thread(new ThreadRecebimentoMensagens(entrada));
         thread.start();
     }
 
@@ -35,11 +35,11 @@ public class Cliente {
         System.out.println("Conexão encerrada");
     }
 
-    private class RecebimentoDeMensagens implements Runnable {
+    private class ThreadRecebimentoMensagens implements Runnable {
 
         private final ObjectInputStream entrada;
 
-        public RecebimentoDeMensagens(ObjectInputStream entrada) {
+        public ThreadRecebimentoMensagens(ObjectInputStream entrada) {
             this.entrada = entrada;
         }
 
@@ -48,13 +48,12 @@ public class Cliente {
             while (true) {
                 try {
                     Object obj = entrada.readObject();
-                    System.out.println(obj.getClass().getName());
                     if (obj instanceof Mensagem) {
                         Mensagem msg = (Mensagem) obj;
                         System.out.print("Mensagem recebida: " + msg.getMensagem());
                         controle.mostrarMensagem(msg.getUsuario(), msg.getCanal(), msg.getMensagem());
                     } else {
-                        System.out.print("Tipo não reconhecido");
+                        throw new ClassNotFoundException();
                     }
                 } catch (IOException ex) {
                     System.err.println("Socket desconectou");

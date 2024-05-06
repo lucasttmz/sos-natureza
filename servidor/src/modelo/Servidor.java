@@ -17,11 +17,11 @@ public class Servidor {
     public void iniciar() {
         try {
             servidor = new ServerSocket(12345);
-            System.out.println("Servidor ouvindo a porta 12345");
+            System.out.println("Servidor escutando na porta 12345");
 
             while (true) {
                 Socket cliente = servidor.accept();
-                System.out.println("Cliente conectado: " + cliente.getInetAddress().getHostAddress());
+                System.out.println("Cliente conectado: " + cliente.getInetAddress().getHostAddress()  + ":" + cliente.getPort());
                 Thread thread = new Thread(new ThreadCliente(cliente));
                 thread.start();
 
@@ -41,6 +41,12 @@ public class Servidor {
             this.socket = socket;
         }
 
+        private void sincronizarMensagens() throws IOException {
+            for (Mensagem msg : todasMensagens) {
+                saida.writeObject(msg);
+            }
+        }
+
         @Override
         public void run() {
             try {
@@ -49,20 +55,18 @@ public class Servidor {
                 entrada = new ObjectInputStream(socket.getInputStream());
                 clientesConectados.add(saida);
 
-                // TODO: Sincronizar as mensagens
-//                for (Mensagem msg : todasMensagens) {
-//                    saida.writeObject(msg);
-//                }
-
+//                sincronizarMensagens();
                 while (true) {
                     Object recebido = entrada.readObject();
 
-                    System.out.print("Mensagem recebida: " + recebido);
-
                     if (recebido instanceof Mensagem) {
-                        todasMensagens.add((Mensagem) recebido);
+                        Mensagem msg = (Mensagem) recebido;
+                        System.out.print("Mensagem recebida: " + socket.getInetAddress().getHostAddress()  + 
+                                ":" + socket.getPort() + " -> " + msg.toString()
+                        );
+                        todasMensagens.add(msg);
                     } else {
-                        System.err.println("Tipo não reconhecido");
+                        throw new ClassNotFoundException();
                     }
 
                     List<ObjectOutputStream> clientesDesconectados = new ArrayList<>();
@@ -70,11 +74,12 @@ public class Servidor {
                         try {
                             cliente.flush();
                             cliente.writeObject(recebido);
-                            System.out.print("Mensagem enviada: " + recebido);
                         } catch (IOException ex) {
                             clientesDesconectados.add(cliente);
                         }
                     }
+                    
+                    System.out.print("Mensagem reenviada a todos os clientes: " + recebido);
 
                     for (ObjectOutputStream cliente : clientesDesconectados) {
                         clientesConectados.remove(cliente);
@@ -83,7 +88,7 @@ public class Servidor {
                 }
 
             } catch (IOException ex) {
-                System.out.println("Cliente desconectado");
+                System.out.println("Cliente desconectado: " + socket.getInetAddress().getHostAddress()  + ":" + socket.getPort());
             } catch (ClassNotFoundException ex) {
                 System.err.println("Erro na leitura do objeto serializado: " + ex);
             }

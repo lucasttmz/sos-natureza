@@ -20,12 +20,6 @@ public class Topico {
         this.descricao = descricao;
         this.caminhoFoto = caminhoFoto;
         this.mensagens = new ArrayList<>();
-        this.mensagens.add(this.nome + ": 1\n");
-        this.mensagens.add(this.nome + ": 2\n");
-        this.mensagens.add(this.nome + ": 3\n");
-        this.mensagens.add(this.nome + ": 4\n");
-        this.mensagens.add(this.nome + ": 5\n");
-        this.mensagens.add(this.nome + ": 6\n");
     }
 
     public String getHashtag() {
