@@ -57,8 +57,8 @@ public class Controle {
         }
     }
 
-    public void mostrarMensagem(String usuario, String canal, String mensagem) {
-        frmC.adicionarMensagem(usuario, canal, mensagem);
+    public void mostrarMensagem(Mensagem msg) {
+        frmC.adicionarMensagem(msg.getUsuario(), msg.getCanal(), msg.getMensagem(), msg.getDataFormatada());
     }
 
     public List<String> informacoesTopico(String hashtag) {

@@ -51,7 +51,7 @@ public class Cliente {
                     if (obj instanceof Mensagem) {
                         Mensagem msg = (Mensagem) obj;
                         System.out.print("Mensagem recebida: " + msg.getMensagem());
-                        controle.mostrarMensagem(msg.getUsuario(), msg.getCanal(), msg.getMensagem());
+                        controle.mostrarMensagem(msg);
                     } else {
                         throw new ClassNotFoundException();
                     }

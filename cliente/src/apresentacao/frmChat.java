@@ -249,21 +249,25 @@ public class frmChat extends JFrame {
         txfEntrada.setText("");
     }
 
-    public void adicionarMensagem(String usuario, String canal, String mensagem) {
+    public void adicionarMensagem(String usuario, String canal, String mensagem, String data) {
         // Mensagem no canal
         JTextArea txaMsg = mensagensTopicos.get(canal);
-        txaMsg.append(usuario + ": " + mensagem);
+        txaMsg.append(data + " - " + usuario + ": " + mensagem);
 
         // Mensagem no #geral
         JTextArea txaMsgGeral = mensagensTopicos.get(canal + "_geral");
         String[] linhas = txaMsgGeral.getText().split("\n");
-        txaMsgGeral.setText("");
-        for (int i = 1; i < linhas.length; i++) {
-            String linha = linhas[i];
-            txaMsgGeral.append(linha + "\n");
-
+        
+        // Esconde mensagens anteriores se necessário para somente mostrar as 3 últimas
+        if (linhas.length < 2) {
+            txaMsgGeral.append(data+ " - " + usuario + ": " + mensagem);
+        } else {
+            txaMsgGeral.setText("");
+            for (int i=linhas.length-2; i < linhas.length ; i++) {
+                txaMsgGeral.append(linhas[i] + "\n");
+            }
+            txaMsgGeral.append(data+ " - " + usuario + ": " + mensagem.strip());
         }
-        txaMsgGeral.append(usuario + ": " + mensagem.strip());
     }
 
     private List<JPanel> criarNovoTopicoGeral(List<String> infoTopico) {
