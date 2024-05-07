@@ -245,8 +245,14 @@ public class frmChat extends JFrame {
             return;
         }
 
-        controle.enviarMensagem(txfEntrada.getText() + "\n");
-        txfEntrada.setText("");
+        if(txfEntrada.getText().equals("/localizacao")){
+            controle.enviarLocalizacao();
+            txfEntrada.setText("");
+        }
+        else{
+            controle.enviarMensagem(txfEntrada.getText() + "\n");
+            txfEntrada.setText("");
+        }
     }
 
     public void adicionarMensagem(String usuario, String canal, String mensagem, String data) {

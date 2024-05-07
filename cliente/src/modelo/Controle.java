@@ -56,6 +56,16 @@ public class Controle {
             System.out.println("Erro ao enviar mensagem");
         }
     }
+    public void enviarLocalizacao(){
+        
+        Comandos comandos = new Comandos();
+        Mensagem msg = new Mensagem(this.nomeExibicao, canalAtual, comandos.getLocation() + "\n");
+        try {
+            cliente.enviarMensagem(msg);
+        } catch (IOException | ClassNotFoundException ex) {
+            System.out.println("Erro ao enviar mensagem");
+        }
+    }
 
     public void mostrarMensagem(Mensagem msg) {
         frmC.adicionarMensagem(msg.getUsuario(), msg.getCanal(), msg.getMensagem(), msg.getDataFormatada());
