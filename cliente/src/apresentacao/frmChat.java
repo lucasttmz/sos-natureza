@@ -2,6 +2,7 @@ package apresentacao;
 
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -19,17 +20,21 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import modelo.Controle;
 
 public class frmChat extends JFrame {
@@ -51,7 +56,7 @@ public class frmChat extends JFrame {
 
     private final Map<String, String> msgSalva;
     private final Map<JLabel, JPanel> paineisTopicos;
-    private final Map<String, JTextArea> mensagensTopicos;
+    private final Map<String, JEditorPane> mensagensTopicos;
     private final Controle controle;
     private final ImageIcon icone;
 
@@ -256,24 +261,25 @@ public class frmChat extends JFrame {
     }
 
     public void adicionarMensagem(String usuario, String canal, String mensagem, String data) {
-        // Mensagem no canal
-        JTextArea txaMsg = mensagensTopicos.get(canal);
-        txaMsg.append(data + " - " + usuario + ": " + mensagem);
-
-        // Mensagem no #geral
-        JTextArea txaMsgGeral = mensagensTopicos.get(canal + "_geral");
-        String[] linhas = txaMsgGeral.getText().split("\n");
-        
-        // Esconde mensagens anteriores se necessário para somente mostrar as 3 últimas
-        if (linhas.length < 2) {
-            txaMsgGeral.append(data+ " - " + usuario + ": " + mensagem);
+        data = "<span style='color:#adadad'>" + data + "</span>";
+        if (usuario.equals(controle.getNomeExibicao())) {
+            usuario = "<span style='font-weight: bold; color:#47de91'>" + usuario + "</span>";
         } else {
-            txaMsgGeral.setText("");
-            for (int i=linhas.length-2; i < linhas.length ; i++) {
-                txaMsgGeral.append(linhas[i] + "\n");
-            }
-            txaMsgGeral.append(data+ " - " + usuario + ": " + mensagem.strip());
+            usuario = "<span style='font-weight: bold'>" + usuario + "</span>";
         }
+        String formatado = data + " - " + usuario + ": " + mensagem.strip();
+
+        // Mensagens do #hashtag
+        JEditorPane edpMsg = mensagensTopicos.get(canal);
+        String conteudo = edpMsg.getText();
+        edpMsg.setText(conteudo.replace("</body>\n</html>", formatado + "<br></body>\n</html>"));
+        edpMsg.setCaretPosition(edpMsg.getDocument().getLength());
+
+        // Mensagens do #geral
+        edpMsg = mensagensTopicos.get(canal + "_geral");
+        conteudo = edpMsg.getText();
+        edpMsg.setText(conteudo.replace("</body>\n</html>", formatado + "<br></body>\n</html>"));
+        edpMsg.setCaretPosition(edpMsg.getDocument().getLength());
     }
 
     private List<JPanel> criarNovoTopicoGeral(List<String> infoTopico) {
@@ -323,28 +329,23 @@ public class frmChat extends JFrame {
 
         // Mensagens do tópico
         JScrollPane scrollMensagens = new JScrollPane();
-        JTextArea txaMensagens = new JTextArea();
-        txaMensagens.setFocusable(false);
-        txaMensagens.setLineWrap(true);
-        txaMensagens.setWrapStyleWord(true);
-        txaMensagens.setColumns(97);
-        txaMensagens.setRows(3);
-        txaMensagens.setEditable(false);
-        scrollMensagens.setViewportView(txaMensagens);
+        JEditorPane edpMensagens = new JEditorPane();
+        edpMensagens.setContentType("text/html");
+        edpMensagens.setText("<html><body></body></html>");
+        edpMensagens.setPreferredSize(new Dimension(larguraMaxima - 20, 54));
+        edpMensagens.setMaximumSize(new Dimension(larguraMaxima - 20, 54));
+        scrollMensagens.setPreferredSize(new Dimension(larguraMaxima - 20, 54));
+        scrollMensagens.setMaximumSize(new Dimension(larguraMaxima - 20, 54));
+        edpMensagens.setEditable(false);
+        edpMensagens.setFocusable(false);
+        scrollMensagens.setViewportView(edpMensagens);
         pnlMsg.add(scrollMensagens);
 
-        // Mostra apenas as três últimas mensagens
         List<String> todasMensagens = controle.todasMensagens(infoTopico.get(3));
-        if (!todasMensagens.isEmpty()) {
-            for (int i = todasMensagens.size() - 3; i < todasMensagens.size(); i++) {
-                String mensagem = todasMensagens.get(i);
-                if (i == todasMensagens.size() - 1) {
-                    mensagem = mensagem.strip();
-                }
-                txaMensagens.append(mensagem);
-            }
-        }
-        mensagensTopicos.put(infoTopico.get(3) + "_geral", txaMensagens);
+        String join = String.join("<br>", todasMensagens);
+        edpMensagens.setText("<html><body>" + join + "</body></html>");
+
+        mensagensTopicos.put(infoTopico.get(3) + "_geral", edpMensagens);
 
         return List.of(pnlDetalhes, pnlMsg);
 
@@ -414,21 +415,18 @@ public class frmChat extends JFrame {
 
         // Mensagens do tópico
         JScrollPane scrollMensagens = new JScrollPane();
-        JTextArea txaMensagens = new JTextArea();
-        txaMensagens.setFocusable(false);
-        txaMensagens.setLineWrap(true);
-        txaMensagens.setWrapStyleWord(true);
-        txaMensagens.setColumns(97);
-        txaMensagens.setRows(27);
-        txaMensagens.setEditable(false);
-        scrollMensagens.setViewportView(txaMensagens);
+        JEditorPane edpMensagens = new JEditorPane();
+        edpMensagens.setPreferredSize(new Dimension(larguraMaxima - 20, 430));
+        edpMensagens.setContentType("text/html");
+        edpMensagens.setEditable(false);
+        edpMensagens.setFocusable(false);
+        scrollMensagens.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollMensagens.setViewportView(edpMensagens);
         pnlMsg.add(scrollMensagens);
 
-        // Mostra todas as mensagens
         List<String> todasMensagens = controle.todasMensagens(hashtag);
-        for (String mensagem : todasMensagens) {
-            txaMensagens.append(mensagem);
-        }
+        String join = String.join("<br>", todasMensagens);
+        edpMensagens.setText("<html><body>" + join + "</body></html>");
 
         pnlTopico.add(pnlDetalhes);
         pnlTopico.add(pnlMsg);
@@ -437,7 +435,7 @@ public class frmChat extends JFrame {
         atualizarTopicos();
 
         // Salva o estado do lado do cliente
-        mensagensTopicos.put(hashtag, txaMensagens);
+        mensagensTopicos.put(hashtag, edpMensagens);
         msgSalva.put(hashtag, "");
 
         List<JPanel> novoTopico = criarNovoTopicoGeral(controle.informacoesTopico(hashtag));
@@ -485,6 +483,8 @@ public class frmChat extends JFrame {
             btnEnviar.setEnabled(false);
             btnEmoji.setEnabled(false);
         } else {
+            JEditorPane edpMsg = mensagensTopicos.get(hashtag);
+            edpMsg.setText(edpMsg.getText());
             txfEntrada.setEnabled(true);
             btnEnviar.setEnabled(true);
             btnEmoji.setEnabled(true);
