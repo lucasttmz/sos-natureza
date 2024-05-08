@@ -23,6 +23,11 @@ public class Controle {
         todosTopicos = new HashMap<>();
         todosTopicos.put("#outros", new Topico("outros", "nada demais", ""));
         todosTopicos.put("#testes", new Topico("testes", "descricao", "img.png"));
+        registrarComandos();
+    }
+    
+    public void registrarComandos() {
+        Comando.comandos.put("/localizacao", new Geolocalizacao());
     }
 
     public boolean validarConexao(String nome, String ip, String porta) {
@@ -58,8 +63,7 @@ public class Controle {
     }
 
     public void executarComando(String comando) {
-        ComandosChat comandosChat = new ComandosChat();
-        enviarMensagem(comandosChat.executar(comando));
+        enviarMensagem(Comando.executarComando(comando));
     }
 
     public void mostrarMensagem(Mensagem msg) {
