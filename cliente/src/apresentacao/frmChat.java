@@ -3,6 +3,7 @@ package apresentacao;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -11,6 +12,10 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,6 +40,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.event.HyperlinkEvent;
 import modelo.Controle;
 
 public class frmChat extends JFrame {
@@ -250,11 +256,10 @@ public class frmChat extends JFrame {
             return;
         }
 
-        if(txfEntrada.getText().equals("/localizacao")){
-            controle.enviarLocalizacao();
+        if (txfEntrada.getText().startsWith("/")) {
+            controle.executarComando(txfEntrada.getText());
             txfEntrada.setText("");
-        }
-        else{
+        } else {
             controle.enviarMensagem(txfEntrada.getText() + "\n");
             txfEntrada.setText("");
         }
@@ -267,7 +272,24 @@ public class frmChat extends JFrame {
         } else {
             usuario = "<span style='font-weight: bold'>" + usuario + "</span>";
         }
-        String formatado = data + " - " + usuario + ": " + mensagem.strip();
+
+        // Adicionar HTML na mensagem
+        mensagem = mensagem.strip();
+        boolean link = false;
+        String[] palavras = mensagem.split(" ");
+        for (int i = 0; i < palavras.length; i++) {
+            if (palavras[i].startsWith("https://") || palavras[i].startsWith("http://")) {
+                if (palavras[i].endsWith(".jpg") || palavras[i].endsWith(".png") || palavras[i].endsWith(".gif")) {
+                    palavras[i] = "<br><img src='" + palavras[i] + "'/>";
+                } else {
+                    palavras[i] = "<a href='" + palavras[i] + "'>" + palavras[i] + "</a>";
+                }
+            }
+            link = true;
+        }
+        mensagem = String.join(" ", palavras);
+
+        String formatado = data + " - " + usuario + ": " + mensagem;
 
         // Mensagens do #hashtag
         JEditorPane edpMsg = mensagensTopicos.get(canal);
@@ -278,6 +300,10 @@ public class frmChat extends JFrame {
         // Mensagens do #geral
         edpMsg = mensagensTopicos.get(canal + "_geral");
         conteudo = edpMsg.getText();
+        if (link) {
+            formatado = formatado.replace("<br><img src='", "")
+                    .replace("'/>", "");
+        }
         edpMsg.setText(conteudo.replace("</body>\n</html>", formatado + "<br></body>\n</html>"));
         edpMsg.setCaretPosition(edpMsg.getDocument().getLength());
     }
@@ -334,6 +360,12 @@ public class frmChat extends JFrame {
         edpMensagens.setText("<html><body></body></html>");
         edpMensagens.setPreferredSize(new Dimension(larguraMaxima - 20, 54));
         edpMensagens.setMaximumSize(new Dimension(larguraMaxima - 20, 54));
+        edpMensagens.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                mostrarTopico(infoTopico.get(3));
+            }
+        });
+        
         scrollMensagens.setPreferredSize(new Dimension(larguraMaxima - 20, 54));
         scrollMensagens.setMaximumSize(new Dimension(larguraMaxima - 20, 54));
         edpMensagens.setEditable(false);
@@ -419,7 +451,17 @@ public class frmChat extends JFrame {
         edpMensagens.setPreferredSize(new Dimension(larguraMaxima - 20, 430));
         edpMensagens.setContentType("text/html");
         edpMensagens.setEditable(false);
-        edpMensagens.setFocusable(false);
+        edpMensagens.addHyperlinkListener((e) -> {
+            HyperlinkEvent.EventType eventType = e.getEventType();
+            if (eventType.equals(HyperlinkEvent.EventType.ACTIVATED)) {
+                URL url = e.getURL();
+                try {
+                    Desktop.getDesktop().browse(url.toURI());
+                } catch (IOException | URISyntaxException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
         scrollMensagens.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         scrollMensagens.setViewportView(edpMensagens);
         pnlMsg.add(scrollMensagens);
