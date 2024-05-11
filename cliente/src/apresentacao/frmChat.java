@@ -2,7 +2,6 @@ package apresentacao;
 
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -13,7 +12,6 @@ import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
@@ -29,17 +27,15 @@ import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
-import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
 import modelo.Controle;
 
@@ -47,6 +43,7 @@ public class frmChat extends JFrame {
 
     private JTextField txfEntrada;
     private JButton btnEmoji;
+    private JButton btnLocalizacao;
     private JButton btnEnviar;
     private JPanel pnlPrincipal;
     private JPanel pnlLateral;
@@ -151,7 +148,7 @@ public class frmChat extends JFrame {
         // Entrada
         txfEntrada = new JTextField("Digite sua mensagem aqui");
         txfEntrada.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
-        txfEntrada.setPreferredSize(new Dimension(905, 30));
+        txfEntrada.setPreferredSize(new Dimension(825, 30));
         txfEntrada.setForeground(Color.WHITE);
 
         // Envio da mensagem
@@ -183,11 +180,19 @@ public class frmChat extends JFrame {
         btnEmoji.setPreferredSize(new Dimension(75, 30));
         btnEmoji.addActionListener((e) -> mostrarListaEmojis());
 
+        // Localizacao
+        btnLocalizacao = new JButton("🌎");
+        btnLocalizacao.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 12));
+        btnLocalizacao.setPreferredSize(new Dimension(75, 30));
+        btnLocalizacao.addActionListener((e) -> enviarLocalizacao());
+
         // Enviar
         btnEnviar = new JButton("Enviar");
         btnEnviar.setPreferredSize(new Dimension(75, 30));
+        btnEnviar.addActionListener((e) -> enviarMensagem());
 
         pnlEntrada.add(txfEntrada);
+        pnlEntrada.add(btnLocalizacao);
         pnlEntrada.add(btnEmoji);
         pnlEntrada.add(btnEnviar);
 
@@ -252,16 +257,38 @@ public class frmChat extends JFrame {
     }
 
     private void enviarMensagem() {
-        if (txfEntrada.getText().isBlank()) {
+        String textoDigitado = txfEntrada.getText();
+        if (textoDigitado.isBlank()) {
             return;
         }
 
-        if (txfEntrada.getText().startsWith("/")) {
-            controle.executarComando(txfEntrada.getText());
-            txfEntrada.setText("");
+        // Checa se foi um comando de chat
+        if (textoDigitado.startsWith("/")) {
+            if (textoDigitado.equals("/localizacao")) {
+                enviarLocalizacao();
+            } else {
+                controle.executarComando(textoDigitado);
+            }
         } else {
-            controle.enviarMensagem(txfEntrada.getText() + "\n");
-            txfEntrada.setText("");
+            controle.enviarMensagem(textoDigitado + "\n");
+        }
+        txfEntrada.setText("");
+    }
+
+    private void enviarLocalizacao() {
+        // Pede permissão para compartilhar localização
+        int permissao = JOptionPane.showOptionDialog(
+                this,
+                "Deseja compartilhar sua localização?",
+                "Aviso de Privacidade",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                new String[]{"Sim", "Não"},
+                "Sim");
+
+        if (permissao == JOptionPane.YES_OPTION) {
+            controle.executarComando("/localizacao");
         }
     }
 
@@ -365,7 +392,7 @@ public class frmChat extends JFrame {
                 mostrarTopico(infoTopico.get(3));
             }
         });
-        
+
         scrollMensagens.setPreferredSize(new Dimension(larguraMaxima - 20, 54));
         scrollMensagens.setMaximumSize(new Dimension(larguraMaxima - 20, 54));
         edpMensagens.setEditable(false);
@@ -413,21 +440,19 @@ public class frmChat extends JFrame {
         // Título do tópico
         JLabel lblTitulo = new JLabel(infoTopico.get(0));
         lblTitulo.setFont(new Font("Segoe UI", Font.PLAIN, 52));
-        lblTitulo.setBackground(Color.white);
         lblTitulo.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 50));
         lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
 
         // Descrição do tópico
         JLabel lblDesc = new JLabel(infoTopico.get(1));
         lblDesc.setFont(new Font("Segoe UI", Font.PLAIN, 22));
-        lblDesc.setBackground(Color.CYAN);
         lblDesc.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 150));
         lblDesc.setHorizontalAlignment(SwingConstants.CENTER);
         lblDesc.setVerticalAlignment(SwingConstants.TOP);
 
         // Imagem do tópico
         JLabel lblImagem = new JLabel(infoTopico.get(2));
-        lblImagem.setPreferredSize(new Dimension(tamanhoImagem, 200));
+        lblImagem.setPreferredSize(new Dimension(tamanhoImagem, tamanhoImagem));
         if (!infoTopico.get(2).isEmpty()) {
             lblImagem.setBorder(BorderFactory.createBevelBorder(0));
             lblImagem.setVerticalTextPosition(SwingConstants.BOTTOM);
@@ -523,12 +548,14 @@ public class frmChat extends JFrame {
             txfEntrada.setText("Não é possível enviar mensagens no #geral");
             txfEntrada.setEnabled(false);
             btnEnviar.setEnabled(false);
+            btnLocalizacao.setEnabled(false);
             btnEmoji.setEnabled(false);
         } else {
             JEditorPane edpMsg = mensagensTopicos.get(hashtag);
             edpMsg.setText(edpMsg.getText());
             txfEntrada.setEnabled(true);
             btnEnviar.setEnabled(true);
+            btnLocalizacao.setEnabled(true);
             btnEmoji.setEnabled(true);
         }
 
