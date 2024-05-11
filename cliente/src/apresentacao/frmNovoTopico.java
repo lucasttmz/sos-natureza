@@ -9,6 +9,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -44,7 +45,7 @@ public class frmNovoTopico extends JDialog {
         txaDesc = new JTextArea();
         txaDesc.setLineWrap(true);
         txaDesc.setWrapStyleWord(true);
-        txaDesc.setBorder(BorderFactory.createLineBorder(new Color(29,62,48)));
+        txaDesc.setBorder(BorderFactory.createLineBorder(new Color(29, 62, 48)));
         txaDesc.setPreferredSize(new Dimension(350, 75));
 
         // Foto
@@ -88,8 +89,13 @@ public class frmNovoTopico extends JDialog {
     private void criarTopico() {
         // TODO: Validar criação do tópico
         Controle controle = new Controle();
-        this.hashtag = controle.criarNovoTopico(List.of(txfNome.getText(), txaDesc.getText(), txfFoto.getText()));
-        this.dispose();
+        if (controle.validarCriacaoTopico(txfNome.getText())) {
+            this.hashtag = controle.criarNovoTopico(List.of(txfNome.getText(), txaDesc.getText(), txfFoto.getText()));
+            this.dispose();
+        } else {
+            JOptionPane.showMessageDialog(this, controle.getMensagem(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+
     }
 
     public Optional<String> getHashtag() {

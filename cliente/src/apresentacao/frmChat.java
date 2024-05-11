@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -127,7 +126,7 @@ public class frmChat extends JFrame {
         btnCriarTopico.setPreferredSize(new Dimension(135, 25));
         btnCriarTopico.setHorizontalAlignment(SwingConstants.LEFT);
         btnCriarTopico.setHorizontalTextPosition(SwingConstants.LEFT);
-
+        
         JSeparator separador = new JSeparator();
         separador.setForeground(Color.LIGHT_GRAY);
 
@@ -237,6 +236,7 @@ public class frmChat extends JFrame {
         lstEmoji.setLayoutOrientation(JList.VERTICAL_WRAP);
         lstEmoji.setVisibleRowCount(3);
 
+        // Concatena o emoji com o texto digitado
         lstEmoji.addListSelectionListener(e -> {
             String selectedEmoji = lstEmoji.getSelectedValue();
             if (txfEntrada.getText().equals("Digite sua mensagem aqui")) {
@@ -315,7 +315,6 @@ public class frmChat extends JFrame {
             link = true;
         }
         mensagem = String.join(" ", palavras);
-
         String formatado = data + " - " + usuario + ": " + mensagem;
 
         // Mensagens do #hashtag
@@ -355,7 +354,7 @@ public class frmChat extends JFrame {
         JLabel lblDesc = new JLabel(infoTopico.get(1));
         lblDesc.setFont(new Font("Segoe UI", Font.PLAIN, 22));
         lblDesc.setBackground(Color.CYAN);
-        lblDesc.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 150));
+        lblDesc.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 100));
         lblDesc.setHorizontalAlignment(SwingConstants.CENTER);
         lblDesc.setVerticalAlignment(SwingConstants.TOP);
 
@@ -371,7 +370,6 @@ public class frmChat extends JFrame {
 
         layoutDetalhes.posicionarComponente(lblImagem, 0, 0, 1, 3);
         layoutDetalhes.posicionarComponente(lblTitulo, 0, 1, 1, 1);
-        layoutDetalhes.posicionarComponente(new JSeparator(), 1, 1, 1, 1);
         layoutDetalhes.posicionarComponente(lblDesc, 2, 1, 1, 1);
 
         // Painel mensagens
@@ -381,29 +379,30 @@ public class frmChat extends JFrame {
         pnlMsg.setBorder(BorderFactory.createSoftBevelBorder(0));
 
         // Mensagens do tópico
-        JScrollPane scrollMensagens = new JScrollPane();
         JEditorPane edpMensagens = new JEditorPane();
         edpMensagens.setContentType("text/html");
         edpMensagens.setText("<html><body></body></html>");
         edpMensagens.setPreferredSize(new Dimension(larguraMaxima - 20, 54));
         edpMensagens.setMaximumSize(new Dimension(larguraMaxima - 20, 54));
-        edpMensagens.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
+        edpMensagens.setEditable(false);
+        edpMensagens.setFocusable(false);
+        edpMensagens.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent evt) {
                 mostrarTopico(infoTopico.get(3));
             }
         });
 
+        // Adiciona o scroll
+        JScrollPane scrollMensagens = new JScrollPane();
         scrollMensagens.setPreferredSize(new Dimension(larguraMaxima - 20, 54));
         scrollMensagens.setMaximumSize(new Dimension(larguraMaxima - 20, 54));
-        edpMensagens.setEditable(false);
-        edpMensagens.setFocusable(false);
         scrollMensagens.setViewportView(edpMensagens);
         pnlMsg.add(scrollMensagens);
 
         List<String> todasMensagens = controle.todasMensagens(infoTopico.get(3));
         String join = String.join("<br>", todasMensagens);
         edpMensagens.setText("<html><body>" + join + "</body></html>");
-
         mensagensTopicos.put(infoTopico.get(3) + "_geral", edpMensagens);
 
         return List.of(pnlDetalhes, pnlMsg);
@@ -446,7 +445,7 @@ public class frmChat extends JFrame {
         // Descrição do tópico
         JLabel lblDesc = new JLabel(infoTopico.get(1));
         lblDesc.setFont(new Font("Segoe UI", Font.PLAIN, 22));
-        lblDesc.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 150));
+        lblDesc.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 100));
         lblDesc.setHorizontalAlignment(SwingConstants.CENTER);
         lblDesc.setVerticalAlignment(SwingConstants.TOP);
 
@@ -462,7 +461,6 @@ public class frmChat extends JFrame {
 
         layoutDetalhes.posicionarComponente(lblImagem, 0, 0, 1, 3);
         layoutDetalhes.posicionarComponente(lblTitulo, 0, 1, 1, 1);
-        layoutDetalhes.posicionarComponente(new JSeparator(), 1, 1, 1, 1);
         layoutDetalhes.posicionarComponente(lblDesc, 2, 1, 1, 1);
 
         // Painel mensagens
@@ -471,11 +469,12 @@ public class frmChat extends JFrame {
         pnlMsg.setBorder(BorderFactory.createSoftBevelBorder(0));
 
         // Mensagens do tópico
-        JScrollPane scrollMensagens = new JScrollPane();
         JEditorPane edpMensagens = new JEditorPane();
         edpMensagens.setPreferredSize(new Dimension(larguraMaxima - 20, 430));
         edpMensagens.setContentType("text/html");
         edpMensagens.setEditable(false);
+        
+        // Abre o link no navegador
         edpMensagens.addHyperlinkListener((e) -> {
             HyperlinkEvent.EventType eventType = e.getEventType();
             if (eventType.equals(HyperlinkEvent.EventType.ACTIVATED)) {
@@ -483,10 +482,13 @@ public class frmChat extends JFrame {
                 try {
                     Desktop.getDesktop().browse(url.toURI());
                 } catch (IOException | URISyntaxException ex) {
-                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(this, "Erro ao abrir o link", "Erro", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
+        
+        // Adiciona o scroll
+        JScrollPane scrollMensagens = new JScrollPane();
         scrollMensagens.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         scrollMensagens.setViewportView(edpMensagens);
         pnlMsg.add(scrollMensagens);
@@ -570,9 +572,9 @@ public class frmChat extends JFrame {
         // Tira o foco do input ao mudar de canal
         txfEntrada.setFocusable(false);
         try {
-            TimeUnit.MILLISECONDS.sleep(1);
+            Thread.sleep(1);
             txfEntrada.setFocusable(true);
-        } catch (InterruptedException e1) {
+        } catch (InterruptedException ex) {
         }
 
     }

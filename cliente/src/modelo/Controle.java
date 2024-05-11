@@ -12,7 +12,7 @@ public class Controle {
     private String nomeExibicao;
     private String mensagem;
 
-    private static HashMap<String, Topico> todosTopicos;
+    private static final HashMap<String, Topico> todosTopicos = new HashMap<>();
     private List<Mensagem> mensagensPendentes; // TODO
     private Cliente cliente;
     private frmChat frmC;
@@ -20,12 +20,11 @@ public class Controle {
     // Temporário enquanto não utilizar os tópicos do servidor
     public Controle() {
         canalAtual = "#geral";
-        todosTopicos = new HashMap<>();
         todosTopicos.put("#outros", new Topico("outros", "nada demais", ""));
         todosTopicos.put("#testes", new Topico("testes", "descricao", "img.png"));
         registrarComandos();
     }
-    
+
     public void registrarComandos() {
         Comando.comandos.put("/localizacao", new Geolocalizacao());
     }
@@ -37,6 +36,16 @@ public class Controle {
             this.mensagem = validacao.mensagem;
         }
         return sucesso;
+    }
+
+    public boolean validarCriacaoTopico(String nomeTopico) {
+        Validacao validacao = new Validacao();
+        boolean sucesso = validacao.validarTopico(getTodosTopicos(), nomeTopico);
+        if (!sucesso) {
+            this.mensagem = validacao.mensagem;
+        }
+        return sucesso;
+
     }
 
     public void conectar(String nome, String ip, int porta) {
@@ -87,6 +96,9 @@ public class Controle {
         );
         todosTopicos.put(topico.getHashtag(), topico);
 
+        for (String topico2 : todosTopicos.keySet()) {
+            System.out.println(topico2);
+        }
         return topico.getHashtag();
     }
 
