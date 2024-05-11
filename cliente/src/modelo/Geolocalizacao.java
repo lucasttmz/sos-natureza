@@ -14,7 +14,7 @@ public class Geolocalizacao implements Comando {
         String linkGoogleMap = "";
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI("http://ip-api.com/json/?fields=city,lat,lon"))
+                    .uri(new URI("http://ip-api.com/line/?fields=lat,lon"))
                     .GET()
                     .build();
 
@@ -24,8 +24,7 @@ public class Geolocalizacao implements Comando {
             if (resposta.statusCode() == 200) {
                 linkGoogleMap = extrairDados(resposta.body());
             } else {
-                System.out.println("Erro na API");
-                linkGoogleMap = "Erro";
+                linkGoogleMap = "Erro: " + resposta.body();
             }
 
         } catch (IOException | URISyntaxException | InterruptedException e) {
@@ -35,27 +34,11 @@ public class Geolocalizacao implements Comando {
         return linkGoogleMap;
     }
 
-    private String extrairDados(String jsonString) {
-        int cidadeIndex = jsonString.indexOf("\"city\":") + "\"city\":".length();
-        int cidadeEndIndex = jsonString.indexOf(",", cidadeIndex);
-        String cidade = jsonString.substring(cidadeIndex, cidadeEndIndex).replaceAll("\"", "");
-
-        int latIndex = jsonString.indexOf("\"lat\":") + "\"lat\":".length();
-        int latEndIndex = jsonString.indexOf(",", latIndex);
-        double lat = Double.parseDouble(jsonString.substring(latIndex, latEndIndex));
-
-        int lonIndex = jsonString.indexOf("\"lon\":") + "\"lon\":".length();
-        int lonEndIndex = jsonString.indexOf("}", lonIndex);
-        double lon = Double.parseDouble(jsonString.substring(lonIndex, lonEndIndex));
-
-        // Imprime os valores extraídos
-        System.out.println("Cidade: " + cidade);
-        System.out.println("Latitude: " + lat);
-        System.out.println("Longitude: " + lon);
-
-        String link = "https://www.google.com/maps/place/" + String.valueOf(lat) + "," + String.valueOf(lon);
+    private String extrairDados(String dados) {
+        String[] linhas = dados.split("\\n");
+        String link = "https://www.google.com/maps/place/" + String.valueOf(linhas[0]) + "," + String.valueOf(linhas[1]);
         
-        return "<a href='"+ link +"'>"+link+"</a>";
+        return "<a href='"+ link +"'>"+ link +"</a>";
     }
     
 }

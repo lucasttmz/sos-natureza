@@ -52,7 +52,6 @@ public class Validacao {
 
         // Nomes devem ser diferentes
         for (List<String> topico : todosTopicos) {
-            System.out.println(topico.get(0));
             if (nomeTopico.equalsIgnoreCase(topico.get(0)) || nomeTopico.equalsIgnoreCase("geral")) {
                 this.mensagem = "Tópico com o mesmo nome já existe\n";
                 return false;
