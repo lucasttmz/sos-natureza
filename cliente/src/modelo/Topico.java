@@ -1,16 +1,16 @@
 package modelo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Topico {
+public class Topico implements Serializable {
 
     private final Integer id;
     private String nome;
     private String descricao;
     private String caminhoFoto;
-    // Mudar para uma list thread-safe
-    private List<String> mensagens;
+    private List<Mensagem> mensagens;
 
     private static int ultimoId = 0;
 
@@ -20,6 +20,10 @@ public class Topico {
         this.descricao = descricao;
         this.caminhoFoto = caminhoFoto;
         this.mensagens = new ArrayList<>();
+
+        // Apenas para testes de sincronia
+        this.mensagens.add(new Mensagem("admin", this.getHashtag(), "mensagem de teste 1"));
+        this.mensagens.add(new Mensagem("admin", this.getHashtag(), "mensagem de teste 2"));
     }
 
     public String getHashtag() {
@@ -55,11 +59,11 @@ public class Topico {
         this.caminhoFoto = caminhoFoto;
     }
 
-    public List<String> getMensagens() {
+    public List<Mensagem> getMensagens() {
         return mensagens;
     }
 
-    public void setMensagens(List<String> mensagens) {
+    public void setMensagens(List<Mensagem> mensagens) {
         this.mensagens = mensagens;
     }
 

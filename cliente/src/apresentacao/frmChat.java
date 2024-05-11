@@ -291,46 +291,20 @@ public class frmChat extends JFrame {
             controle.executarComando("/localizacao");
         }
     }
-
-    public void adicionarMensagem(String usuario, String canal, String mensagem, String data) {
-        data = "<span style='color:#adadad'>" + data + "</span>";
-        if (usuario.equals(controle.getNomeExibicao())) {
-            usuario = "<span style='font-weight: bold; color:#47de91'>" + usuario + "</span>";
-        } else {
-            usuario = "<span style='font-weight: bold'>" + usuario + "</span>";
-        }
-
-        // Adicionar HTML na mensagem
-        mensagem = mensagem.strip();
-        boolean link = false;
-        String[] palavras = mensagem.split(" ");
-        for (int i = 0; i < palavras.length; i++) {
-            if (palavras[i].startsWith("https://") || palavras[i].startsWith("http://")) {
-                if (palavras[i].endsWith(".jpg") || palavras[i].endsWith(".png") || palavras[i].endsWith(".gif")) {
-                    palavras[i] = "<br><img src='" + palavras[i] + "'/>";
-                } else {
-                    palavras[i] = "<a href='" + palavras[i] + "'>" + palavras[i] + "</a>";
-                }
-            }
-            link = true;
-        }
-        mensagem = String.join(" ", palavras);
-        String formatado = data + " - " + usuario + ": " + mensagem;
-
+    
+    public void adicionarMensagem(String msgFormatada, String canal) {
         // Mensagens do #hashtag
         JEditorPane edpMsg = mensagensTopicos.get(canal);
         String conteudo = edpMsg.getText();
-        edpMsg.setText(conteudo.replace("</body>\n</html>", formatado + "<br></body>\n</html>"));
+        edpMsg.setText(conteudo.replace("</body>\n</html>", msgFormatada + "<br></body>\n</html>"));
         edpMsg.setCaretPosition(edpMsg.getDocument().getLength());
 
         // Mensagens do #geral
         edpMsg = mensagensTopicos.get(canal + "_geral");
         conteudo = edpMsg.getText();
-        if (link) {
-            formatado = formatado.replace("<br><img src='", "")
-                    .replace("'/>", "");
-        }
-        edpMsg.setText(conteudo.replace("</body>\n</html>", formatado + "<br></body>\n</html>"));
+        // Remove a imagem na hora de exibir no #geral
+        msgFormatada = msgFormatada.replace("<br><img src='", "").replace("'/>", "");
+        edpMsg.setText(conteudo.replace("</body>\n</html>", msgFormatada + "<br></body>\n</html>"));
         edpMsg.setCaretPosition(edpMsg.getDocument().getLength());
     }
 
@@ -401,8 +375,11 @@ public class frmChat extends JFrame {
         pnlMsg.add(scrollMensagens);
 
         List<String> todasMensagens = controle.todasMensagens(infoTopico.get(3));
-        String join = String.join("<br>", todasMensagens);
-        edpMensagens.setText("<html><body>" + join + "</body></html>");
+        String juntos = String.join("<br>", todasMensagens);
+        if (!juntos.isBlank()) {
+            juntos += "<br>";
+        }
+        edpMensagens.setText("<html><body>" + juntos + "</body></html>");
         mensagensTopicos.put(infoTopico.get(3) + "_geral", edpMensagens);
 
         return List.of(pnlDetalhes, pnlMsg);
@@ -494,8 +471,11 @@ public class frmChat extends JFrame {
         pnlMsg.add(scrollMensagens);
 
         List<String> todasMensagens = controle.todasMensagens(hashtag);
-        String join = String.join("<br>", todasMensagens);
-        edpMensagens.setText("<html><body>" + join + "</body></html>");
+        String juntos = String.join("<br>", todasMensagens);
+        if (!juntos.isBlank()) {
+            juntos += "<br>";
+        }
+        edpMensagens.setText("<html><body>" + juntos + "</body></html>");
 
         pnlTopico.add(pnlDetalhes);
         pnlTopico.add(pnlMsg);

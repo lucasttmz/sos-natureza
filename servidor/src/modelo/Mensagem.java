@@ -18,6 +18,34 @@ public class Mensagem implements Serializable {
         this.data = LocalDateTime.now();
     }
 
+    public String formatarParaExibicao(boolean colorirUsuario) {
+        // Colorir a data
+        String dataFormatada = "<span style='color:#adadad'>" + this.getDataFormatada() + "</span>";
+
+        // Colorir o usuário
+        String usuarioFormatado;
+        if (colorirUsuario) {
+            usuarioFormatado = "<span style='font-weight: bold; color:#47de91'>" + this.getUsuario() + "</span>";
+        } else {
+            usuarioFormatado = "<span style='font-weight: bold'>" + this.getUsuario() + "</span>";
+        }
+
+        // Adicionar HTML na mensagem se possuir link ou imagem
+        String mensagemFormatada = this.getMensagem().strip();
+        String[] palavras = mensagemFormatada.split(" ");
+        for (int i = 0; i < palavras.length; i++) {
+            if (palavras[i].startsWith("https://") || palavras[i].startsWith("http://")) {
+                if (palavras[i].endsWith(".jpg") || palavras[i].endsWith(".png") || palavras[i].endsWith(".gif")) {
+                    palavras[i] = "<br><img src='" + palavras[i] + "'/>";
+                } else {
+                    palavras[i] = "<a href='" + palavras[i] + "'>" + palavras[i] + "</a>";
+                }
+            }
+        }
+        mensagemFormatada = String.join(" ", palavras);
+        return dataFormatada + " - " + usuarioFormatado + ": " + mensagemFormatada;
+    }
+
     public String getUsuario() {
         return usuario;
     }

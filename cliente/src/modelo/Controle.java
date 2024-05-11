@@ -2,9 +2,9 @@ package modelo;
 
 import apresentacao.frmChat;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Controle {
 
@@ -67,7 +67,8 @@ public class Controle {
         try {
             cliente.enviarMensagem(msg);
         } catch (IOException | ClassNotFoundException ex) {
-            System.out.println("Erro ao enviar mensagem");
+            this.mensagem = "Erro ao enviar mensagem";
+            System.err.println(this.mensagem);
         }
     }
 
@@ -76,7 +77,9 @@ public class Controle {
     }
 
     public void mostrarMensagem(Mensagem msg) {
-        frmC.adicionarMensagem(msg.getUsuario(), msg.getCanal(), msg.getMensagem(), msg.getDataFormatada());
+        boolean colorir = msg.getUsuario().equals(this.getNomeExibicao());
+        String formatada = msg.formatarParaExibicao(colorir);
+        frmC.adicionarMensagem(formatada, msg.getCanal());
     }
 
     public List<String> informacoesTopico(String hashtag) {
@@ -85,20 +88,17 @@ public class Controle {
     }
 
     public List<String> todasMensagens(String hashtag) {
-        return todosTopicos.get(hashtag).getMensagens();
+        List<String> mensagensFormatadas = new ArrayList<>();
+        for (Mensagem msg : todosTopicos.get(hashtag).getMensagens()) {
+            boolean colorir = msg.getUsuario().equals(this.getNomeExibicao());
+            mensagensFormatadas.add(msg.formatarParaExibicao(colorir));
+        }
+        return mensagensFormatadas;
     }
 
     public String criarNovoTopico(List<String> infoTopico) {
-        Topico topico = new Topico(
-                infoTopico.get(0),
-                infoTopico.get(1),
-                infoTopico.get(2)
-        );
+        Topico topico = new Topico(infoTopico.get(0), infoTopico.get(1), infoTopico.get(2));
         todosTopicos.put(topico.getHashtag(), topico);
-
-        for (String topico2 : todosTopicos.keySet()) {
-            System.out.println(topico2);
-        }
         return topico.getHashtag();
     }
 
@@ -112,9 +112,11 @@ public class Controle {
     }
 
     public List<List<String>> getTodosTopicos() {
-        return todosTopicos.keySet().stream()
-                .map(hashtag -> informacoesTopico(hashtag))
-                .collect(Collectors.toList());
+        List<List<String>> topicos = new ArrayList<>();
+        for (String hashtag : todosTopicos.keySet()) {
+            topicos.add(informacoesTopico(hashtag));
+        }
+        return topicos;
     }
 
     public String getMensagem() {
