@@ -61,6 +61,7 @@ public class Cliente {
                     }
                 } catch (IOException ex) {
                     System.err.println("Socket desconectou");
+                    break;
                 } catch (ClassNotFoundException ex) {
                     System.err.println("Erro na leitura do objeto serializado: " + ex);
                 }

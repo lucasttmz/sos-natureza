@@ -66,8 +66,8 @@ public class Servidor {
                         Topico topico = todosTopicos.get(msg.getCanal());
                         topico.getMensagens().add(msg);
 
-                        System.out.print("Mensagem recebida: " + socket.getInetAddress().getHostAddress()
-                                + ":" + socket.getPort() + " -> " + msg.toString()
+                        System.out.println("Mensagem recebida: " + socket.getInetAddress().getHostAddress()
+                                + ":" + socket.getPort() + " -> " + msg.toString().strip()
                         );
                     } else if (recebido instanceof Topico) {
                         Topico topico = (Topico) recebido;

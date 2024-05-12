@@ -3,12 +3,13 @@ package modelo;
 import apresentacao.frmChat;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import Comandos.Geolocalizacao;
 import Comandos.Gifs;
 import Comandos.Telefones;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class Controle {
 
@@ -16,7 +17,7 @@ public class Controle {
     private String nomeExibicao;
     private String mensagem;
 
-    private static final HashMap<String, Topico> todosTopicos = new HashMap<>();
+    private static final Map<String, Topico> todosTopicos = new LinkedHashMap<>();
     private final List<Topico> topicosPendentes = new ArrayList<>();
     private Cliente cliente;
     private frmChat frmC;
