@@ -63,9 +63,18 @@ public class Controle {
     public void enviarMensagem(String mensagem) {
         Mensagem msg = new Mensagem(this.nomeExibicao, canalAtual, mensagem);
         try {
-            cliente.enviarMensagem(msg);
+            cliente.enviarObjeto(msg);
         } catch (IOException | ClassNotFoundException ex) {
             this.mensagem = "Erro ao enviar mensagem";
+            System.err.println(this.mensagem);
+        }
+    }
+
+    public void enviarTopico(Topico topico) {
+        try {
+            cliente.enviarObjeto(topico);
+        } catch (IOException | ClassNotFoundException ex) {
+            this.mensagem = "Erro ao enviar topico";
             System.err.println(this.mensagem);
         }
     }
@@ -96,14 +105,15 @@ public class Controle {
 
     public String criarNovoTopico(List<String> infoTopico) {
         Topico topico = new Topico(infoTopico.get(0), infoTopico.get(1), infoTopico.get(2));
-        todosTopicos.put(topico.getHashtag(), topico);
+//        todosTopicos.put(topico.getHashtag(), topico);
+        enviarTopico(topico);
         return topico.getHashtag();
     }
 
     public void receberNovoTopico(Topico topico) {
         todosTopicos.put(topico.getHashtag(), topico);
         String hashtag = topico.getHashtag();
-        
+
         // Checa se o tópico foi recebido pelo servidor antes do formulário carregar
         // e armazena para mostrar quando carregar.
         if (frmC == null) {
@@ -112,7 +122,7 @@ public class Controle {
             frmC.adicionarNovoTopico(hashtag);
         }
     }
-    
+
     public void sincronizarTopicos() {
         for (Topico topico : topicosPendentes) {
             frmC.adicionarNovoTopico(topico.getHashtag());

@@ -67,12 +67,12 @@ public class frmChat extends JFrame {
         this.paineisTopicos = new LinkedHashMap<>(); // Preserva a ordem
         this.mensagensTopicos = new HashMap<>();
         this.msgSalva = new HashMap<>();
-
         this.icone = new ImageIcon(getClass().getResource("/resources/icon.png"));
-
+        
         iniciarComponentes();
 
         this.setTitle("SOS Natureza");
+        this.setIconImage(icone.getImage());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
         this.pack();
@@ -80,9 +80,6 @@ public class frmChat extends JFrame {
     }
 
     private void iniciarComponentes() {
-        // Ícone
-        setIconImage(icone.getImage());
-
         // Configura os paineis
         configurarPainelLateral();
         configurarPainelEntrada();
@@ -91,10 +88,6 @@ public class frmChat extends JFrame {
 
         // Inicializa os tópicos
         adicionarTopicoGeral();
-        for (List<String> topico : controle.getTodosTopicos()) {
-            adicionarNovoTopico(topico.get(3));
-        }
-
         mostrarTopico("#geral");
     }
 
@@ -571,10 +564,7 @@ public class frmChat extends JFrame {
     }
 
     private void criarNovoTopico() {
-        frmNovoTopico frmNT = new frmNovoTopico();
+        frmNovoTopico frmNT = new frmNovoTopico(this.controle);
         frmNT.setVisible(true);
-        frmNT.getHashtag().ifPresent((hashtag) -> {
-            adicionarNovoTopico(hashtag);
-        });
     }
 }

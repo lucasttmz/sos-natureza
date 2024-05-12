@@ -6,6 +6,13 @@ import java.util.List;
 
 public class Topico implements Serializable {
 
+    public enum Acao {
+        CRIAR,
+        EDITAR,
+        APAGAR
+    }
+
+    private Acao acao;
     private final Integer id;
     private String nome;
     private String descricao;
@@ -15,15 +22,16 @@ public class Topico implements Serializable {
     private static int ultimoId = 0;
 
     public Topico(String nome, String descricao, String caminhoFoto) {
+        this(Acao.CRIAR, nome, descricao, caminhoFoto);
+    }
+
+    public Topico(Acao acao, String nome, String descricao, String caminhoFoto) {
         this.id = ++Topico.ultimoId;
+        this.acao = acao;
         this.nome = nome;
         this.descricao = descricao;
         this.caminhoFoto = caminhoFoto;
         this.mensagens = new ArrayList<>();
-
-        // Apenas para testes de sincronia
-        this.mensagens.add(new Mensagem("admin", this.getHashtag(), "mensagem de teste 1"));
-        this.mensagens.add(new Mensagem("admin", this.getHashtag(), "mensagem de teste 2"));
     }
 
     public String getHashtag() {
@@ -33,6 +41,14 @@ public class Topico implements Serializable {
 
     public Integer getId() {
         return id;
+    }
+
+    public Acao getAcao() {
+        return acao;
+    }
+
+    public void setAcao(Acao acao) {
+        this.acao = acao;
     }
 
     public String getNome() {

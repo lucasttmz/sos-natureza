@@ -22,9 +22,12 @@ public class frmNovoTopico extends JDialog {
     private JTextArea txaDesc;
     private JTextField txfNome;
     private JTextField txfFoto;
+
+    private final Controle controle;
     private String hashtag;
 
-    public frmNovoTopico() {
+    public frmNovoTopico(Controle controle) {
+        this.controle = controle;
         this.setTitle("Criar novo tópico");
         this.setModal(true);
         this.setSize(400, 370);
@@ -87,8 +90,6 @@ public class frmNovoTopico extends JDialog {
     }
 
     private void criarTopico() {
-        // TODO: Validar criação do tópico
-        Controle controle = new Controle();
         if (controle.validarCriacaoTopico(txfNome.getText())) {
             this.hashtag = controle.criarNovoTopico(List.of(txfNome.getText(), txaDesc.getText(), txfFoto.getText()));
             this.dispose();

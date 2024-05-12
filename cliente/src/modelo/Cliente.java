@@ -25,7 +25,7 @@ public class Cliente {
         thread.start();
     }
 
-    public void enviarMensagem(Mensagem mensagem) throws IOException, ClassNotFoundException {
+    public void enviarObjeto(Object mensagem) throws IOException, ClassNotFoundException {
         saida.writeObject(mensagem);
     }
 

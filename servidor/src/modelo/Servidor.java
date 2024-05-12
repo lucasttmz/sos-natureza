@@ -6,14 +6,14 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Servidor {
 
     private final List<ObjectOutputStream> clientesConectados = new ArrayList<>();
-    private final Map<String, Topico> todosTopicos = new HashMap<>();
+    private final Map<String, Topico> todosTopicos = new LinkedHashMap<>(); // Preserva ordem
     private ServerSocket servidor;
 
     // Temporário para enquanto não for possível comunicar a criação tópicos
@@ -60,13 +60,12 @@ public class Servidor {
         @Override
         public void run() {
             try {
-
                 saida = new ObjectOutputStream(socket.getOutputStream());
                 entrada = new ObjectInputStream(socket.getInputStream());
                 clientesConectados.add(saida);
 
                 sincronizarTopicos();
-
+                
                 while (true) {
                     Object recebido = entrada.readObject();
 
@@ -81,7 +80,17 @@ public class Servidor {
                     } else if (recebido instanceof Topico) {
                         Topico topico = (Topico) recebido;
 
-                        System.out.println("Topico criado: " + topico.getHashtag());
+                        if (topico.getAcao() == Topico.Acao.CRIAR) {
+                            todosTopicos.put(topico.getHashtag(), topico);
+                            System.out.println("Topico criado: " + topico.getHashtag());
+                        } else if (topico.getAcao() == Topico.Acao.EDITAR) {
+                            todosTopicos.replace(topico.getHashtag(), topico);
+                            System.out.println("Topico editado: " + topico.getHashtag());
+                        } else {
+                            todosTopicos.remove(topico.getHashtag());
+                            System.out.println("Topico apagado: " + topico.getHashtag());
+                        }
+
                     } else {
                         throw new ClassNotFoundException();
                     }
