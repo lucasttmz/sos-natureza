@@ -1,4 +1,4 @@
-package modelo;
+package Comandos;
 
 import java.io.IOException;
 import java.net.URI;
@@ -7,10 +7,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import modelo.Comando;
+
 public class Geolocalizacao implements Comando {
 
     @Override
-    public String executar() {
+    public String executar(String vazio) {
         String linkGoogleMap = "";
         try {
             HttpRequest request = HttpRequest.newBuilder()
@@ -22,6 +24,7 @@ public class Geolocalizacao implements Comando {
 
             HttpResponse<String> resposta = cliente.send(request, HttpResponse.BodyHandlers.ofString());
             if (resposta.statusCode() == 200) {
+                System.out.println(resposta.body());
                 linkGoogleMap = extrairDados(resposta.body());
             } else {
                 linkGoogleMap = "Erro: " + resposta.body();

@@ -297,7 +297,7 @@ public class frmChat extends JFrame {
         conteudo = edpMsg.getText();
         // Remove a imagem na hora de exibir no #geral
         msgFormatada = msgFormatada.replace("<br><img src='", "").replace("'/>", "");
-        edpMsg.setText(conteudo.replace("</body>\n</html>", msgFormatada + "<br></body>\n</html>"));
+        edpMsg.setText(conteudo.replace("<br><img WIDTH=\"300\" HEIGHT=\"300\" src='", msgFormatada + "<br></body>\n</html>"));
         edpMsg.setCaretPosition(edpMsg.getDocument().getLength());
     }
 

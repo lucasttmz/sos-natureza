@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import Comandos.Geolocalizacao;
+import Comandos.Gifs;
+import Comandos.Telefones;
+
 public class Controle {
 
     private String canalAtual;
@@ -24,6 +28,8 @@ public class Controle {
 
     public void registrarComandos() {
         Comando.comandos.put("/localizacao", new Geolocalizacao());
+        Comando.comandos.put("/telefones", new Telefones());
+        Comando.comandos.put("/gif", new Gifs());
     }
 
     public boolean validarConexao(String nome, String ip, String porta) {
