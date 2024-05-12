@@ -2,7 +2,6 @@ package apresentacao;
 
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -13,14 +12,12 @@ import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -29,17 +26,15 @@ import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
-import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
 import modelo.Controle;
 
@@ -47,6 +42,7 @@ public class frmChat extends JFrame {
 
     private JTextField txfEntrada;
     private JButton btnEmoji;
+    private JButton btnLocalizacao;
     private JButton btnEnviar;
     private JPanel pnlPrincipal;
     private JPanel pnlLateral;
@@ -71,12 +67,12 @@ public class frmChat extends JFrame {
         this.paineisTopicos = new LinkedHashMap<>(); // Preserva a ordem
         this.mensagensTopicos = new HashMap<>();
         this.msgSalva = new HashMap<>();
-
         this.icone = new ImageIcon(getClass().getResource("/resources/icon.png"));
-
+        
         iniciarComponentes();
 
         this.setTitle("SOS Natureza");
+        this.setIconImage(icone.getImage());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
         this.pack();
@@ -84,9 +80,6 @@ public class frmChat extends JFrame {
     }
 
     private void iniciarComponentes() {
-        // Ícone
-        setIconImage(icone.getImage());
-
         // Configura os paineis
         configurarPainelLateral();
         configurarPainelEntrada();
@@ -95,10 +88,6 @@ public class frmChat extends JFrame {
 
         // Inicializa os tópicos
         adicionarTopicoGeral();
-        for (List<String> topico : controle.getTodosTopicos()) {
-            adicionarNovoTopico(topico.get(3));
-        }
-
         mostrarTopico("#geral");
     }
 
@@ -130,7 +119,7 @@ public class frmChat extends JFrame {
         btnCriarTopico.setPreferredSize(new Dimension(135, 25));
         btnCriarTopico.setHorizontalAlignment(SwingConstants.LEFT);
         btnCriarTopico.setHorizontalTextPosition(SwingConstants.LEFT);
-
+        
         JSeparator separador = new JSeparator();
         separador.setForeground(Color.LIGHT_GRAY);
 
@@ -151,7 +140,7 @@ public class frmChat extends JFrame {
         // Entrada
         txfEntrada = new JTextField("Digite sua mensagem aqui");
         txfEntrada.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
-        txfEntrada.setPreferredSize(new Dimension(905, 30));
+        txfEntrada.setPreferredSize(new Dimension(825, 30));
         txfEntrada.setForeground(Color.WHITE);
 
         // Envio da mensagem
@@ -183,11 +172,19 @@ public class frmChat extends JFrame {
         btnEmoji.setPreferredSize(new Dimension(75, 30));
         btnEmoji.addActionListener((e) -> mostrarListaEmojis());
 
+        // Localizacao
+        btnLocalizacao = new JButton("🌎");
+        btnLocalizacao.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 12));
+        btnLocalizacao.setPreferredSize(new Dimension(75, 30));
+        btnLocalizacao.addActionListener((e) -> enviarLocalizacao());
+
         // Enviar
         btnEnviar = new JButton("Enviar");
         btnEnviar.setPreferredSize(new Dimension(75, 30));
+        btnEnviar.addActionListener((e) -> enviarMensagem());
 
         pnlEntrada.add(txfEntrada);
+        pnlEntrada.add(btnLocalizacao);
         pnlEntrada.add(btnEmoji);
         pnlEntrada.add(btnEnviar);
 
@@ -232,6 +229,7 @@ public class frmChat extends JFrame {
         lstEmoji.setLayoutOrientation(JList.VERTICAL_WRAP);
         lstEmoji.setVisibleRowCount(3);
 
+        // Concatena o emoji com o texto digitado
         lstEmoji.addListSelectionListener(e -> {
             String selectedEmoji = lstEmoji.getSelectedValue();
             if (txfEntrada.getText().equals("Digite sua mensagem aqui")) {
@@ -252,59 +250,54 @@ public class frmChat extends JFrame {
     }
 
     private void enviarMensagem() {
-        if (txfEntrada.getText().isBlank()) {
+        String textoDigitado = txfEntrada.getText();
+        if (textoDigitado.isBlank()) {
             return;
         }
 
-        if (txfEntrada.getText().startsWith("/")) {
-            controle.executarComando(txfEntrada.getText());
-            txfEntrada.setText("");
+        // Checa se foi um comando de chat
+        if (textoDigitado.startsWith("/")) {
+            if (textoDigitado.equals("/localizacao")) {
+                enviarLocalizacao();
+            } else {
+                controle.executarComando(textoDigitado);
+            }
         } else {
-            controle.enviarMensagem(txfEntrada.getText() + "\n");
-            txfEntrada.setText("");
+            controle.enviarMensagem(textoDigitado + "\n");
         }
+        txfEntrada.setText("");
     }
 
-    public void adicionarMensagem(String usuario, String canal, String mensagem, String data) {
-        data = "<span style='color:#adadad'>" + data + "</span>";
-        if (usuario.equals(controle.getNomeExibicao())) {
-            usuario = "<span style='font-weight: bold; color:#47de91'>" + usuario + "</span>";
-        } else {
-            usuario = "<span style='font-weight: bold'>" + usuario + "</span>";
+    private void enviarLocalizacao() {
+        // Pede permissão para compartilhar localização
+        int permissao = JOptionPane.showOptionDialog(
+                this,
+                "Deseja compartilhar sua localização?",
+                "Aviso de Privacidade",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                new String[]{"Sim", "Não"},
+                "Sim");
+
+        if (permissao == JOptionPane.YES_OPTION) {
+            controle.executarComando("/localizacao");
         }
-
-        // Adicionar HTML na mensagem
-        mensagem = mensagem.strip();
-        boolean link = false;
-        String[] palavras = mensagem.split(" ");
-        for (int i = 0; i < palavras.length; i++) {
-            if (palavras[i].startsWith("https://") || palavras[i].startsWith("http://")) {
-                if (palavras[i].endsWith(".jpg") || palavras[i].endsWith(".png") || palavras[i].endsWith(".gif")) {
-                    palavras[i] = "<br><img WIDTH=\"300\" HEIGHT=\"300\" src='" + palavras[i] + "'/>";
-                } else {
-                    palavras[i] = "<a href='" + palavras[i] + "'>" + palavras[i] + "</a>";
-                }
-            }
-            link = true;
-        }
-        mensagem = String.join(" ", palavras);
-
-        String formatado = data + " - " + usuario + ": " + mensagem;
-
+    }
+    
+    public void adicionarMensagem(String msgFormatada, String canal) {
         // Mensagens do #hashtag
         JEditorPane edpMsg = mensagensTopicos.get(canal);
         String conteudo = edpMsg.getText();
-        edpMsg.setText(conteudo.replace("</body>\n</html>", formatado + "<br></body>\n</html>"));
+        edpMsg.setText(conteudo.replace("</body>\n</html>", msgFormatada + "<br></body>\n</html>"));
         edpMsg.setCaretPosition(edpMsg.getDocument().getLength());
 
         // Mensagens do #geral
         edpMsg = mensagensTopicos.get(canal + "_geral");
         conteudo = edpMsg.getText();
-        if (link) {
-            formatado = formatado.replace("<br><img src='", "")
-                    .replace("'/>", "");
-        }
-        edpMsg.setText(conteudo.replace("</body>\n</html>", formatado + "<br></body>\n</html>"));
+        // Remove a imagem na hora de exibir no #geral
+        msgFormatada = msgFormatada.replace("<br><img src='", "").replace("'/>", "");
+        edpMsg.setText(conteudo.replace("<br><img WIDTH=\"300\" HEIGHT=\"300\" src='", msgFormatada + "<br></body>\n</html>"));
         edpMsg.setCaretPosition(edpMsg.getDocument().getLength());
     }
 
@@ -328,23 +321,23 @@ public class frmChat extends JFrame {
         JLabel lblDesc = new JLabel(infoTopico.get(1));
         lblDesc.setFont(new Font("Segoe UI", Font.PLAIN, 22));
         lblDesc.setBackground(Color.CYAN);
-        lblDesc.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 150));
+        lblDesc.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 100));
         lblDesc.setHorizontalAlignment(SwingConstants.CENTER);
         lblDesc.setVerticalAlignment(SwingConstants.TOP);
 
         // Imagem do tópico
-        JLabel lblImagem = new JLabel(infoTopico.get(2));
+        JLabel lblImagem = new JLabel();
         lblImagem.setPreferredSize(new Dimension(tamanhoImagem, tamanhoImagem));
         if (!infoTopico.get(2).isEmpty()) {
             lblImagem.setBorder(BorderFactory.createBevelBorder(0));
             lblImagem.setVerticalTextPosition(SwingConstants.BOTTOM);
             lblImagem.setHorizontalTextPosition(SwingConstants.CENTER);
             lblImagem.setHorizontalAlignment(SwingConstants.CENTER);
+            lblImagem.setIcon(new ImageIcon(infoTopico.get(2)));
         }
 
         layoutDetalhes.posicionarComponente(lblImagem, 0, 0, 1, 3);
         layoutDetalhes.posicionarComponente(lblTitulo, 0, 1, 1, 1);
-        layoutDetalhes.posicionarComponente(new JSeparator(), 1, 1, 1, 1);
         layoutDetalhes.posicionarComponente(lblDesc, 2, 1, 1, 1);
 
         // Painel mensagens
@@ -354,29 +347,33 @@ public class frmChat extends JFrame {
         pnlMsg.setBorder(BorderFactory.createSoftBevelBorder(0));
 
         // Mensagens do tópico
-        JScrollPane scrollMensagens = new JScrollPane();
         JEditorPane edpMensagens = new JEditorPane();
         edpMensagens.setContentType("text/html");
         edpMensagens.setText("<html><body></body></html>");
         edpMensagens.setPreferredSize(new Dimension(larguraMaxima - 20, 54));
         edpMensagens.setMaximumSize(new Dimension(larguraMaxima - 20, 54));
-        edpMensagens.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
+        edpMensagens.setEditable(false);
+        edpMensagens.setFocusable(false);
+        edpMensagens.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent evt) {
                 mostrarTopico(infoTopico.get(3));
             }
         });
-        
+
+        // Adiciona o scroll
+        JScrollPane scrollMensagens = new JScrollPane();
         scrollMensagens.setPreferredSize(new Dimension(larguraMaxima - 20, 54));
         scrollMensagens.setMaximumSize(new Dimension(larguraMaxima - 20, 54));
-        edpMensagens.setEditable(false);
-        edpMensagens.setFocusable(false);
         scrollMensagens.setViewportView(edpMensagens);
         pnlMsg.add(scrollMensagens);
 
         List<String> todasMensagens = controle.todasMensagens(infoTopico.get(3));
-        String join = String.join("<br>", todasMensagens);
-        edpMensagens.setText("<html><body>" + join + "</body></html>");
-
+        String juntos = String.join("<br>", todasMensagens);
+        if (!juntos.isBlank()) {
+            juntos += "<br>";
+        }
+        edpMensagens.setText("<html><body>" + juntos + "</body></html>");
         mensagensTopicos.put(infoTopico.get(3) + "_geral", edpMensagens);
 
         return List.of(pnlDetalhes, pnlMsg);
@@ -413,31 +410,29 @@ public class frmChat extends JFrame {
         // Título do tópico
         JLabel lblTitulo = new JLabel(infoTopico.get(0));
         lblTitulo.setFont(new Font("Segoe UI", Font.PLAIN, 52));
-        lblTitulo.setBackground(Color.white);
         lblTitulo.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 50));
         lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
 
         // Descrição do tópico
         JLabel lblDesc = new JLabel(infoTopico.get(1));
         lblDesc.setFont(new Font("Segoe UI", Font.PLAIN, 22));
-        lblDesc.setBackground(Color.CYAN);
-        lblDesc.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 150));
+        lblDesc.setPreferredSize(new Dimension(larguraMaxima - tamanhoImagem - 10, 100));
         lblDesc.setHorizontalAlignment(SwingConstants.CENTER);
         lblDesc.setVerticalAlignment(SwingConstants.TOP);
 
         // Imagem do tópico
-        JLabel lblImagem = new JLabel(infoTopico.get(2));
-        lblImagem.setPreferredSize(new Dimension(tamanhoImagem, 200));
+        JLabel lblImagem = new JLabel();
+        lblImagem.setPreferredSize(new Dimension(tamanhoImagem, tamanhoImagem));
         if (!infoTopico.get(2).isEmpty()) {
             lblImagem.setBorder(BorderFactory.createBevelBorder(0));
             lblImagem.setVerticalTextPosition(SwingConstants.BOTTOM);
             lblImagem.setHorizontalTextPosition(SwingConstants.CENTER);
             lblImagem.setHorizontalAlignment(SwingConstants.CENTER);
+            lblImagem.setIcon(new ImageIcon(infoTopico.get(2)));
         }
 
         layoutDetalhes.posicionarComponente(lblImagem, 0, 0, 1, 3);
         layoutDetalhes.posicionarComponente(lblTitulo, 0, 1, 1, 1);
-        layoutDetalhes.posicionarComponente(new JSeparator(), 1, 1, 1, 1);
         layoutDetalhes.posicionarComponente(lblDesc, 2, 1, 1, 1);
 
         // Painel mensagens
@@ -446,11 +441,12 @@ public class frmChat extends JFrame {
         pnlMsg.setBorder(BorderFactory.createSoftBevelBorder(0));
 
         // Mensagens do tópico
-        JScrollPane scrollMensagens = new JScrollPane();
         JEditorPane edpMensagens = new JEditorPane();
         edpMensagens.setPreferredSize(new Dimension(larguraMaxima - 20, 430));
         edpMensagens.setContentType("text/html");
         edpMensagens.setEditable(false);
+        
+        // Abre o link no navegador
         edpMensagens.addHyperlinkListener((e) -> {
             HyperlinkEvent.EventType eventType = e.getEventType();
             if (eventType.equals(HyperlinkEvent.EventType.ACTIVATED)) {
@@ -458,17 +454,23 @@ public class frmChat extends JFrame {
                 try {
                     Desktop.getDesktop().browse(url.toURI());
                 } catch (IOException | URISyntaxException ex) {
-                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(this, "Erro ao abrir o link", "Erro", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
+        
+        // Adiciona o scroll
+        JScrollPane scrollMensagens = new JScrollPane();
         scrollMensagens.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         scrollMensagens.setViewportView(edpMensagens);
         pnlMsg.add(scrollMensagens);
 
         List<String> todasMensagens = controle.todasMensagens(hashtag);
-        String join = String.join("<br>", todasMensagens);
-        edpMensagens.setText("<html><body>" + join + "</body></html>");
+        String juntos = String.join("<br>", todasMensagens);
+        if (!juntos.isBlank()) {
+            juntos += "<br>";
+        }
+        edpMensagens.setText("<html><body>" + juntos + "</body></html>");
 
         pnlTopico.add(pnlDetalhes);
         pnlTopico.add(pnlMsg);
@@ -523,12 +525,14 @@ public class frmChat extends JFrame {
             txfEntrada.setText("Não é possível enviar mensagens no #geral");
             txfEntrada.setEnabled(false);
             btnEnviar.setEnabled(false);
+            btnLocalizacao.setEnabled(false);
             btnEmoji.setEnabled(false);
         } else {
             JEditorPane edpMsg = mensagensTopicos.get(hashtag);
             edpMsg.setText(edpMsg.getText());
             txfEntrada.setEnabled(true);
             btnEnviar.setEnabled(true);
+            btnLocalizacao.setEnabled(true);
             btnEmoji.setEnabled(true);
         }
 
@@ -543,9 +547,9 @@ public class frmChat extends JFrame {
         // Tira o foco do input ao mudar de canal
         txfEntrada.setFocusable(false);
         try {
-            TimeUnit.MILLISECONDS.sleep(1);
+            Thread.sleep(1);
             txfEntrada.setFocusable(true);
-        } catch (InterruptedException e1) {
+        } catch (InterruptedException ex) {
         }
 
     }
@@ -562,10 +566,7 @@ public class frmChat extends JFrame {
     }
 
     private void criarNovoTopico() {
-        frmNovoTopico frmNT = new frmNovoTopico();
+        frmNovoTopico frmNT = new frmNovoTopico(this.controle);
         frmNT.setVisible(true);
-        frmNT.getHashtag().ifPresent((hashtag) -> {
-            adicionarNovoTopico(hashtag);
-        });
     }
 }

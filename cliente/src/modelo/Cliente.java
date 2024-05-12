@@ -25,7 +25,7 @@ public class Cliente {
         thread.start();
     }
 
-    public void enviarMensagem(Mensagem mensagem) throws IOException, ClassNotFoundException {
+    public void enviarObjeto(Object mensagem) throws IOException, ClassNotFoundException {
         saida.writeObject(mensagem);
     }
 
@@ -47,11 +47,15 @@ public class Cliente {
         public void run() {
             while (true) {
                 try {
-                    Object obj = entrada.readObject();
-                    if (obj instanceof Mensagem) {
-                        Mensagem msg = (Mensagem) obj;
+                    Object recebido = entrada.readObject();
+                    if (recebido instanceof Mensagem) {
+                        Mensagem msg = (Mensagem) recebido;
                         System.out.print("Mensagem recebida: " + msg.getMensagem());
                         controle.mostrarMensagem(msg);
+                    } else if (recebido instanceof Topico) {
+                        Topico topico = (Topico) recebido;
+                        System.out.println("Topico recebido: " + topico.getHashtag());
+                        controle.receberNovoTopico(topico);
                     } else {
                         throw new ClassNotFoundException();
                     }

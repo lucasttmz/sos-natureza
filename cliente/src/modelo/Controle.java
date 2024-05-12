@@ -2,9 +2,9 @@ package modelo;
 
 import apresentacao.frmChat;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import Comandos.Geolocalizacao;
 import Comandos.Gifs;
@@ -16,20 +16,16 @@ public class Controle {
     private String nomeExibicao;
     private String mensagem;
 
-    private static HashMap<String, Topico> todosTopicos;
-    private List<Mensagem> mensagensPendentes; // TODO
+    private static final HashMap<String, Topico> todosTopicos = new HashMap<>();
+    private final List<Topico> topicosPendentes = new ArrayList<>();
     private Cliente cliente;
     private frmChat frmC;
 
-    // Temporário enquanto não utilizar os tópicos do servidor
     public Controle() {
         canalAtual = "#geral";
-        todosTopicos = new HashMap<>();
-        todosTopicos.put("#outros", new Topico("outros", "nada demais", ""));
-        todosTopicos.put("#testes", new Topico("testes", "descricao", "img.png"));
         registrarComandos();
     }
-    
+
     public void registrarComandos() {
         Comando.comandos.put("/localizacao", new Geolocalizacao());
         Comando.comandos.put("/telefones", new Telefones());
@@ -45,6 +41,16 @@ public class Controle {
         return sucesso;
     }
 
+    public boolean validarCriacaoTopico(String nomeTopico) {
+        Validacao validacao = new Validacao();
+        boolean sucesso = validacao.validarTopico(getTodosTopicos(), nomeTopico);
+        if (!sucesso) {
+            this.mensagem = validacao.mensagem;
+        }
+        return sucesso;
+
+    }
+
     public void conectar(String nome, String ip, int porta) {
         this.mensagem = "";
         this.nomeExibicao = nome;
@@ -54,6 +60,7 @@ public class Controle {
             this.cliente.conectar(ip, porta);
             this.frmC = new frmChat(this);
             this.frmC.setVisible(true);
+            sincronizarTopicos();
         } catch (IOException ex) {
             this.mensagem = "Erro ao conectar com o servidor!";
         }
@@ -62,9 +69,19 @@ public class Controle {
     public void enviarMensagem(String mensagem) {
         Mensagem msg = new Mensagem(this.nomeExibicao, canalAtual, mensagem);
         try {
-            cliente.enviarMensagem(msg);
+            cliente.enviarObjeto(msg);
         } catch (IOException | ClassNotFoundException ex) {
-            System.out.println("Erro ao enviar mensagem");
+            this.mensagem = "Erro ao enviar mensagem";
+            System.err.println(this.mensagem);
+        }
+    }
+
+    public void enviarTopico(Topico topico) {
+        try {
+            cliente.enviarObjeto(topico);
+        } catch (IOException | ClassNotFoundException ex) {
+            this.mensagem = "Erro ao enviar topico";
+            System.err.println(this.mensagem);
         }
     }
 
@@ -73,7 +90,9 @@ public class Controle {
     }
 
     public void mostrarMensagem(Mensagem msg) {
-        frmC.adicionarMensagem(msg.getUsuario(), msg.getCanal(), msg.getMensagem(), msg.getDataFormatada());
+        boolean colorir = msg.getUsuario().equals(this.getNomeExibicao());
+        String formatada = msg.formatarParaExibicao(colorir);
+        frmC.adicionarMensagem(formatada, msg.getCanal());
     }
 
     public List<String> informacoesTopico(String hashtag) {
@@ -82,18 +101,50 @@ public class Controle {
     }
 
     public List<String> todasMensagens(String hashtag) {
-        return todosTopicos.get(hashtag).getMensagens();
+        List<String> mensagensFormatadas = new ArrayList<>();
+        for (Mensagem msg : todosTopicos.get(hashtag).getMensagens()) {
+            boolean colorir = msg.getUsuario().equals(this.getNomeExibicao());
+            mensagensFormatadas.add(msg.formatarParaExibicao(colorir));
+        }
+        return mensagensFormatadas;
     }
 
     public String criarNovoTopico(List<String> infoTopico) {
-        Topico topico = new Topico(
-                infoTopico.get(0),
-                infoTopico.get(1),
-                infoTopico.get(2)
-        );
-        todosTopicos.put(topico.getHashtag(), topico);
-
+        Topico topico = new Topico(infoTopico.get(0), infoTopico.get(1));
+        String caminhoArquivo = infoTopico.get(2);
+        if (!caminhoArquivo.isBlank()) {
+            Arquivo arquivo = new Arquivo();
+            topico.setFoto(arquivo.converterParaBytes(caminhoArquivo));
+            topico.setExtensaoFoto(arquivo.verificarExtensao(caminhoArquivo));
+        }
+        enviarTopico(topico);
         return topico.getHashtag();
+    }
+
+    public void receberNovoTopico(Topico topico) {
+        String hashtag = topico.getHashtag();
+        todosTopicos.put(hashtag, topico);
+        
+        // Salva imagem do tópico
+        if (topico.getFoto() != null) {
+            Arquivo arquivo = new Arquivo();
+            String caminhoFoto = arquivo.salvarArquivo(topico.getFoto(), topico.getExtensaoFoto());
+            topico.setCaminhoFoto(caminhoFoto);
+        }
+        
+        // Checa se o tópico foi recebido pelo servidor antes do formulário carregar
+        // e armazena para mostrar quando carregar.
+        if (frmC == null) {
+            topicosPendentes.add(topico);
+        } else {
+            frmC.adicionarNovoTopico(hashtag);
+        }
+    }
+
+    public void sincronizarTopicos() {
+        for (Topico topico : topicosPendentes) {
+            frmC.adicionarNovoTopico(topico.getHashtag());
+        }
     }
 
     public void excluirTopico(String hashtag) {
@@ -106,9 +157,11 @@ public class Controle {
     }
 
     public List<List<String>> getTodosTopicos() {
-        return todosTopicos.keySet().stream()
-                .map(hashtag -> informacoesTopico(hashtag))
-                .collect(Collectors.toList());
+        List<List<String>> topicos = new ArrayList<>();
+        for (String hashtag : todosTopicos.keySet()) {
+            topicos.add(informacoesTopico(hashtag));
+        }
+        return topicos;
     }
 
     public String getMensagem() {

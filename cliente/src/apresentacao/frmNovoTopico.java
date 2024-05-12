@@ -3,12 +3,15 @@ package apresentacao;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
-import java.util.Optional;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -21,9 +24,12 @@ public class frmNovoTopico extends JDialog {
     private JTextArea txaDesc;
     private JTextField txfNome;
     private JTextField txfFoto;
+
+    private final Controle controle;
     private String hashtag;
 
-    public frmNovoTopico() {
+    public frmNovoTopico(Controle controle) {
+        this.controle = controle;
         this.setTitle("Criar novo tópico");
         this.setModal(true);
         this.setSize(400, 370);
@@ -44,13 +50,19 @@ public class frmNovoTopico extends JDialog {
         txaDesc = new JTextArea();
         txaDesc.setLineWrap(true);
         txaDesc.setWrapStyleWord(true);
-        txaDesc.setBorder(BorderFactory.createLineBorder(new Color(29,62,48)));
+        txaDesc.setBorder(BorderFactory.createLineBorder(new Color(29, 62, 48)));
         txaDesc.setPreferredSize(new Dimension(350, 75));
 
         // Foto
         JLabel lblFoto = new JLabel("Foto");
         txfFoto = new JTextField();
         txfFoto.setPreferredSize(new Dimension(350, 30));
+        txfFoto.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                escolherFoto();
+            }
+        });
 
         // Botão Criar
         JButton btnCriar = new JButton("Criar");
@@ -86,13 +98,21 @@ public class frmNovoTopico extends JDialog {
     }
 
     private void criarTopico() {
-        // TODO: Validar criação do tópico
-        Controle controle = new Controle();
-        this.hashtag = controle.criarNovoTopico(List.of(txfNome.getText(), txaDesc.getText(), txfFoto.getText()));
-        this.dispose();
+        if (controle.validarCriacaoTopico(txfNome.getText())) {
+            this.hashtag = controle.criarNovoTopico(List.of(txfNome.getText(), txaDesc.getText(), txfFoto.getText()));
+            this.dispose();
+        } else {
+            JOptionPane.showMessageDialog(this, controle.getMensagem(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
-    public Optional<String> getHashtag() {
-        return Optional.ofNullable(this.hashtag);
+    private void escolherFoto() {
+        JFileChooser fileChooser = new JFileChooser();
+        int resposta = fileChooser.showOpenDialog(this);
+        if (resposta == JFileChooser.APPROVE_OPTION) {
+            String caminho = fileChooser.getSelectedFile().getPath();
+            txfFoto.setText(caminho);
+            txfFoto.setEditable(false);
+        }
     }
 }
