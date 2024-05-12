@@ -36,7 +36,7 @@ public class Mensagem implements Serializable {
         for (int i = 0; i < palavras.length; i++) {
             if (palavras[i].startsWith("https://") || palavras[i].startsWith("http://")) {
                 if (palavras[i].endsWith(".jpg") || palavras[i].endsWith(".png") || palavras[i].endsWith(".gif")) {
-                    palavras[i] = "<br><img src='" + palavras[i] + "'/>";
+                    palavras[i] = "<br><img  WIDTH=\"300\" HEIGHT=\"300\" src='" + palavras[i] + "'/>";
                 } else {
                     palavras[i] = "<a href='" + palavras[i] + "'>" + palavras[i] + "</a>";
                 }

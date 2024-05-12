@@ -50,7 +50,7 @@ public class Cliente {
                     Object recebido = entrada.readObject();
                     if (recebido instanceof Mensagem) {
                         Mensagem msg = (Mensagem) recebido;
-                        System.out.print("Mensagem recebida: " + msg.getMensagem());
+                        System.out.println("Mensagem recebida: " + msg.getMensagem().strip());
                         controle.mostrarMensagem(msg);
                     } else if (recebido instanceof Topico) {
                         Topico topico = (Topico) recebido;

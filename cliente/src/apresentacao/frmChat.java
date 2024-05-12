@@ -68,7 +68,7 @@ public class frmChat extends JFrame {
         this.mensagensTopicos = new HashMap<>();
         this.msgSalva = new HashMap<>();
         this.icone = new ImageIcon(getClass().getResource("/resources/icon.png"));
-        
+
         iniciarComponentes();
 
         this.setTitle("SOS Natureza");
@@ -119,7 +119,7 @@ public class frmChat extends JFrame {
         btnCriarTopico.setPreferredSize(new Dimension(135, 25));
         btnCriarTopico.setHorizontalAlignment(SwingConstants.LEFT);
         btnCriarTopico.setHorizontalTextPosition(SwingConstants.LEFT);
-        
+
         JSeparator separador = new JSeparator();
         separador.setForeground(Color.LIGHT_GRAY);
 
@@ -284,7 +284,7 @@ public class frmChat extends JFrame {
             controle.executarComando("/localizacao");
         }
     }
-    
+
     public void adicionarMensagem(String msgFormatada, String canal) {
         // Mensagens do #hashtag
         JEditorPane edpMsg = mensagensTopicos.get(canal);
@@ -296,8 +296,9 @@ public class frmChat extends JFrame {
         edpMsg = mensagensTopicos.get(canal + "_geral");
         conteudo = edpMsg.getText();
         // Remove a imagem na hora de exibir no #geral
-        msgFormatada = msgFormatada.replace("<br><img src='", "").replace("'/>", "");
-        edpMsg.setText(conteudo.replace("<br><img WIDTH=\"300\" HEIGHT=\"300\" src='", msgFormatada + "<br></body>\n</html>"));
+
+        msgFormatada = msgFormatada.replace("<br><img  WIDTH=\"300\" HEIGHT=\"300\" src='", "").replace("'/>", "");
+        edpMsg.setText(conteudo.replace("</body>\n</html>", msgFormatada + "<br></body>\n</html>"));
         edpMsg.setCaretPosition(edpMsg.getDocument().getLength());
     }
 
@@ -373,6 +374,7 @@ public class frmChat extends JFrame {
         if (!juntos.isBlank()) {
             juntos += "<br>";
         }
+        juntos = juntos.replaceAll("<br><img  WIDTH=\"300\" HEIGHT=\"300\" src='", "").replace("'/>", "");
         edpMensagens.setText("<html><body>" + juntos + "</body></html>");
         mensagensTopicos.put(infoTopico.get(3) + "_geral", edpMensagens);
 
@@ -445,7 +447,7 @@ public class frmChat extends JFrame {
         edpMensagens.setPreferredSize(new Dimension(larguraMaxima - 20, 430));
         edpMensagens.setContentType("text/html");
         edpMensagens.setEditable(false);
-        
+
         // Abre o link no navegador
         edpMensagens.addHyperlinkListener((e) -> {
             HyperlinkEvent.EventType eventType = e.getEventType();
@@ -458,7 +460,7 @@ public class frmChat extends JFrame {
                 }
             }
         });
-        
+
         // Adiciona o scroll
         JScrollPane scrollMensagens = new JScrollPane();
         scrollMensagens.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
