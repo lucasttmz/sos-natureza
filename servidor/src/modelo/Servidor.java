@@ -6,13 +6,23 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Servidor {
 
     private final List<ObjectOutputStream> clientesConectados = new ArrayList<>();
-    private final List<Mensagem> todasMensagens = new ArrayList<>();
+    private final Map<String, Topico> todosTopicos = new HashMap<>();
     private ServerSocket servidor;
+
+    // Temporário para enquanto não for possível comunicar a criação tópicos
+    public Servidor() {
+        Topico topico = new Topico("incendio", "pegando fogo na rua tal", "123.jpg");
+        todosTopicos.put(topico.getHashtag(), topico);
+        topico = new Topico("descarte", "jogaram lixo na rua da faculdade", "");
+        todosTopicos.put(topico.getHashtag(), topico);
+    }
 
     public void iniciar() {
         try {
@@ -21,7 +31,7 @@ public class Servidor {
 
             while (true) {
                 Socket cliente = servidor.accept();
-                System.out.println("Cliente conectado: " + cliente.getInetAddress().getHostAddress()  + ":" + cliente.getPort());
+                System.out.println("Cliente conectado: " + cliente.getInetAddress().getHostAddress() + ":" + cliente.getPort());
                 Thread thread = new Thread(new ThreadCliente(cliente));
                 thread.start();
 
@@ -41,9 +51,9 @@ public class Servidor {
             this.socket = socket;
         }
 
-        private void sincronizarMensagens() throws IOException {
-            for (Mensagem msg : todasMensagens) {
-                saida.writeObject(msg);
+        private void sincronizarTopicos() throws IOException {
+            for (Topico topico : todosTopicos.values()) {
+                saida.writeObject(topico);
             }
         }
 
@@ -55,16 +65,23 @@ public class Servidor {
                 entrada = new ObjectInputStream(socket.getInputStream());
                 clientesConectados.add(saida);
 
-//                sincronizarMensagens();
+                sincronizarTopicos();
+
                 while (true) {
                     Object recebido = entrada.readObject();
 
                     if (recebido instanceof Mensagem) {
                         Mensagem msg = (Mensagem) recebido;
-                        System.out.print("Mensagem recebida: " + socket.getInetAddress().getHostAddress()  + 
-                                ":" + socket.getPort() + " -> " + msg.toString()
+                        Topico topico = todosTopicos.get(msg.getCanal());
+                        topico.getMensagens().add(msg);
+
+                        System.out.print("Mensagem recebida: " + socket.getInetAddress().getHostAddress()
+                                + ":" + socket.getPort() + " -> " + msg.toString()
                         );
-                        todasMensagens.add(msg);
+                    } else if (recebido instanceof Topico) {
+                        Topico topico = (Topico) recebido;
+
+                        System.out.println("Topico criado: " + topico.getHashtag());
                     } else {
                         throw new ClassNotFoundException();
                     }
@@ -78,7 +95,7 @@ public class Servidor {
                             clientesDesconectados.add(cliente);
                         }
                     }
-                    
+
                     System.out.print("Mensagem reenviada a todos os clientes: " + recebido);
 
                     for (ObjectOutputStream cliente : clientesDesconectados) {
@@ -88,7 +105,7 @@ public class Servidor {
                 }
 
             } catch (IOException ex) {
-                System.out.println("Cliente desconectado: " + socket.getInetAddress().getHostAddress()  + ":" + socket.getPort());
+                System.out.println("Cliente desconectado: " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
             } catch (ClassNotFoundException ex) {
                 System.err.println("Erro na leitura do objeto serializado: " + ex);
             }

@@ -20,6 +20,10 @@ public class Topico implements Serializable {
         this.descricao = descricao;
         this.caminhoFoto = caminhoFoto;
         this.mensagens = new ArrayList<>();
+
+        // Apenas para testes de sincronia
+        this.mensagens.add(new Mensagem("admin", this.getHashtag(), "mensagem de teste 1"));
+        this.mensagens.add(new Mensagem("admin", this.getHashtag(), "mensagem de teste 2"));
     }
 
     public String getHashtag() {

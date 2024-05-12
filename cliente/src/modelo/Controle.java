@@ -13,15 +13,12 @@ public class Controle {
     private String mensagem;
 
     private static final HashMap<String, Topico> todosTopicos = new HashMap<>();
-    private List<Mensagem> mensagensPendentes; // TODO
+    private final List<Topico> topicosPendentes = new ArrayList<>();
     private Cliente cliente;
     private frmChat frmC;
 
-    // Temporário enquanto não utilizar os tópicos do servidor
     public Controle() {
         canalAtual = "#geral";
-        todosTopicos.put("#outros", new Topico("outros", "nada demais", ""));
-        todosTopicos.put("#testes", new Topico("testes", "descricao", "img.png"));
         registrarComandos();
     }
 
@@ -57,6 +54,7 @@ public class Controle {
             this.cliente.conectar(ip, porta);
             this.frmC = new frmChat(this);
             this.frmC.setVisible(true);
+            sincronizarTopicos();
         } catch (IOException ex) {
             this.mensagem = "Erro ao conectar com o servidor!";
         }
@@ -100,6 +98,25 @@ public class Controle {
         Topico topico = new Topico(infoTopico.get(0), infoTopico.get(1), infoTopico.get(2));
         todosTopicos.put(topico.getHashtag(), topico);
         return topico.getHashtag();
+    }
+
+    public void receberNovoTopico(Topico topico) {
+        todosTopicos.put(topico.getHashtag(), topico);
+        String hashtag = topico.getHashtag();
+        
+        // Checa se o tópico foi recebido pelo servidor antes do formulário carregar
+        // e armazena para mostrar quando carregar.
+        if (frmC == null) {
+            topicosPendentes.add(topico);
+        } else {
+            frmC.adicionarNovoTopico(hashtag);
+        }
+    }
+    
+    public void sincronizarTopicos() {
+        for (Topico topico : topicosPendentes) {
+            frmC.adicionarNovoTopico(topico.getHashtag());
+        }
     }
 
     public void excluirTopico(String hashtag) {
