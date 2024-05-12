@@ -3,11 +3,13 @@ package apresentacao;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
-import java.util.Optional;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -55,6 +57,12 @@ public class frmNovoTopico extends JDialog {
         JLabel lblFoto = new JLabel("Foto");
         txfFoto = new JTextField();
         txfFoto.setPreferredSize(new Dimension(350, 30));
+        txfFoto.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                escolherFoto();
+            }
+        });
 
         // Botão Criar
         JButton btnCriar = new JButton("Criar");
@@ -96,10 +104,15 @@ public class frmNovoTopico extends JDialog {
         } else {
             JOptionPane.showMessageDialog(this, controle.getMensagem(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
-
     }
 
-    public Optional<String> getHashtag() {
-        return Optional.ofNullable(this.hashtag);
+    private void escolherFoto() {
+        JFileChooser fileChooser = new JFileChooser();
+        int resposta = fileChooser.showOpenDialog(this);
+        if (resposta == JFileChooser.APPROVE_OPTION) {
+            String caminho = fileChooser.getSelectedFile().getPath();
+            txfFoto.setText(caminho);
+            txfFoto.setEditable(false);
+        }
     }
 }

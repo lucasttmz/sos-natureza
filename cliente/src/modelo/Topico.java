@@ -6,31 +6,21 @@ import java.util.List;
 
 public class Topico implements Serializable {
 
-    public enum Acao {
-        CRIAR,
-        EDITAR,
-        APAGAR
-    }
-
-    private Acao acao;
     private final Integer id;
     private String nome;
     private String descricao;
+    private byte[] foto;
+    private String extensaoFoto;
     private String caminhoFoto;
     private List<Mensagem> mensagens;
 
     private static int ultimoId = 0;
 
-    public Topico(String nome, String descricao, String caminhoFoto) {
-        this(Acao.CRIAR, nome, descricao, caminhoFoto);
-    }
-
-    public Topico(Acao acao, String nome, String descricao, String caminhoFoto) {
+    public Topico(String nome, String descricao) {
         this.id = ++Topico.ultimoId;
-        this.acao = acao;
         this.nome = nome;
         this.descricao = descricao;
-        this.caminhoFoto = caminhoFoto;
+        this.caminhoFoto = "";
         this.mensagens = new ArrayList<>();
     }
 
@@ -41,14 +31,6 @@ public class Topico implements Serializable {
 
     public Integer getId() {
         return id;
-    }
-
-    public Acao getAcao() {
-        return acao;
-    }
-
-    public void setAcao(Acao acao) {
-        this.acao = acao;
     }
 
     public String getNome() {
@@ -67,6 +49,22 @@ public class Topico implements Serializable {
         this.descricao = descricao;
     }
 
+    public byte[] getFoto() {
+        return foto;
+    }
+
+    public void setFoto(byte[] foto) {
+        this.foto = foto;
+    }
+
+    public String getExtensaoFoto() {
+        return extensaoFoto;
+    }
+
+    public void setExtensaoFoto(String extensaoFoto) {
+        this.extensaoFoto = extensaoFoto;
+    }
+
     public String getCaminhoFoto() {
         return caminhoFoto;
     }
@@ -81,6 +79,11 @@ public class Topico implements Serializable {
 
     public void setMensagens(List<Mensagem> mensagens) {
         this.mensagens = mensagens;
+    }
+
+    @Override
+    public String toString() {
+        return "<" + this.getHashtag() + "> ";
     }
 
 }

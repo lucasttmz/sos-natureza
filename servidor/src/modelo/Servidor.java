@@ -16,14 +16,6 @@ public class Servidor {
     private final Map<String, Topico> todosTopicos = new LinkedHashMap<>(); // Preserva ordem
     private ServerSocket servidor;
 
-    // Temporário para enquanto não for possível comunicar a criação tópicos
-    public Servidor() {
-        Topico topico = new Topico("incendio", "pegando fogo na rua tal", "123.jpg");
-        todosTopicos.put(topico.getHashtag(), topico);
-        topico = new Topico("descarte", "jogaram lixo na rua da faculdade", "");
-        todosTopicos.put(topico.getHashtag(), topico);
-    }
-
     public void iniciar() {
         try {
             servidor = new ServerSocket(12345);
@@ -65,7 +57,7 @@ public class Servidor {
                 clientesConectados.add(saida);
 
                 sincronizarTopicos();
-                
+
                 while (true) {
                     Object recebido = entrada.readObject();
 
@@ -79,18 +71,9 @@ public class Servidor {
                         );
                     } else if (recebido instanceof Topico) {
                         Topico topico = (Topico) recebido;
+                        todosTopicos.put(topico.getHashtag(), topico);
 
-                        if (topico.getAcao() == Topico.Acao.CRIAR) {
-                            todosTopicos.put(topico.getHashtag(), topico);
-                            System.out.println("Topico criado: " + topico.getHashtag());
-                        } else if (topico.getAcao() == Topico.Acao.EDITAR) {
-                            todosTopicos.replace(topico.getHashtag(), topico);
-                            System.out.println("Topico editado: " + topico.getHashtag());
-                        } else {
-                            todosTopicos.remove(topico.getHashtag());
-                            System.out.println("Topico apagado: " + topico.getHashtag());
-                        }
-
+                        System.out.println("Topico criado: " + topico.getHashtag());
                     } else {
                         throw new ClassNotFoundException();
                     }
@@ -105,7 +88,7 @@ public class Servidor {
                         }
                     }
 
-                    System.out.print("Mensagem reenviada a todos os clientes: " + recebido);
+                    System.out.println("Mensagem reenviada a todos os clientes: " + recebido.toString().strip());
 
                     for (ObjectOutputStream cliente : clientesDesconectados) {
                         clientesConectados.remove(cliente);

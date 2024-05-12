@@ -326,13 +326,14 @@ public class frmChat extends JFrame {
         lblDesc.setVerticalAlignment(SwingConstants.TOP);
 
         // Imagem do tópico
-        JLabel lblImagem = new JLabel(infoTopico.get(2));
+        JLabel lblImagem = new JLabel();
         lblImagem.setPreferredSize(new Dimension(tamanhoImagem, tamanhoImagem));
         if (!infoTopico.get(2).isEmpty()) {
             lblImagem.setBorder(BorderFactory.createBevelBorder(0));
             lblImagem.setVerticalTextPosition(SwingConstants.BOTTOM);
             lblImagem.setHorizontalTextPosition(SwingConstants.CENTER);
             lblImagem.setHorizontalAlignment(SwingConstants.CENTER);
+            lblImagem.setIcon(new ImageIcon(infoTopico.get(2)));
         }
 
         layoutDetalhes.posicionarComponente(lblImagem, 0, 0, 1, 3);

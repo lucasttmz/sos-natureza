@@ -104,16 +104,28 @@ public class Controle {
     }
 
     public String criarNovoTopico(List<String> infoTopico) {
-        Topico topico = new Topico(infoTopico.get(0), infoTopico.get(1), infoTopico.get(2));
-//        todosTopicos.put(topico.getHashtag(), topico);
+        Topico topico = new Topico(infoTopico.get(0), infoTopico.get(1));
+        String caminhoArquivo = infoTopico.get(2);
+        if (!caminhoArquivo.isBlank()) {
+            Arquivo arquivo = new Arquivo();
+            topico.setFoto(arquivo.converterParaBytes(caminhoArquivo));
+            topico.setExtensaoFoto(arquivo.verificarExtensao(caminhoArquivo));
+        }
         enviarTopico(topico);
         return topico.getHashtag();
     }
 
     public void receberNovoTopico(Topico topico) {
-        todosTopicos.put(topico.getHashtag(), topico);
         String hashtag = topico.getHashtag();
-
+        todosTopicos.put(hashtag, topico);
+        
+        // Salva imagem do tópico
+        if (topico.getFoto() != null) {
+            Arquivo arquivo = new Arquivo();
+            String caminhoFoto = arquivo.salvarArquivo(topico.getFoto(), topico.getExtensaoFoto());
+            topico.setCaminhoFoto(caminhoFoto);
+        }
+        
         // Checa se o tópico foi recebido pelo servidor antes do formulário carregar
         // e armazena para mostrar quando carregar.
         if (frmC == null) {
