@@ -396,7 +396,7 @@ public class frmChat extends JFrame {
         atualizarTopicos();
     }
 
-    public void adicionarNovoTopico(String hashtag) {
+    public synchronized void adicionarNovoTopico(String hashtag) {
         JPanel pnlTopico = new JPanel();
         JLabel lblAba = adicionarAba(hashtag);
 
@@ -479,7 +479,7 @@ public class frmChat extends JFrame {
         paineisTopicos.put(lblAba, pnlTopico);
         pnlMensagens.add(pnlTopico, lblAba.getText());
         atualizarTopicos();
-
+        
         // Salva o estado do lado do cliente
         mensagensTopicos.put(hashtag, edpMensagens);
         msgSalva.put(hashtag, "");
