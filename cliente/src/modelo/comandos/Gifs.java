@@ -1,4 +1,4 @@
-package Comandos;
+package modelo.comandos;
 
 import java.io.IOException;
 import java.net.URI;
@@ -8,8 +8,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import modelo.Comando;
 
 public class Gifs implements Comando {
 
@@ -47,10 +45,10 @@ public class Gifs implements Comando {
 
         ArrayList<String> listaJSON = new ArrayList<>(Arrays.asList(jsonString.split(",")));
         ArrayList<String> listaURL = new ArrayList<>();
-        
+
         for (int i = 0; i < listaJSON.size(); i++) {
-            
-            if( listaJSON.get(i).contains("\"url\":\"")){
+
+            if (listaJSON.get(i).contains("\"url\":\"")) {
 
                 listaURL.add(listaJSON.get(i));
             }

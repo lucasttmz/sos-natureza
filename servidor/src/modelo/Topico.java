@@ -6,7 +6,6 @@ import java.util.List;
 
 public class Topico implements Serializable {
 
-    private final Integer id;
     private String nome;
     private String descricao;
     private byte[] foto;
@@ -14,10 +13,7 @@ public class Topico implements Serializable {
     private String caminhoFoto;
     private List<Mensagem> mensagens;
 
-    private static int ultimoId = 0;
-
     public Topico(String nome, String descricao) {
-        this.id = ++Topico.ultimoId;
         this.nome = nome;
         this.descricao = descricao;
         this.caminhoFoto = "";
@@ -27,10 +23,6 @@ public class Topico implements Serializable {
     public String getHashtag() {
         String slug = this.nome.toLowerCase().replaceAll(" ", "-");
         return "#" + slug;
-    }
-
-    public Integer getId() {
-        return id;
     }
 
     public String getNome() {

@@ -5,9 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import Comandos.Geolocalizacao;
-import Comandos.Gifs;
-import Comandos.Telefones;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -24,13 +21,6 @@ public class Controle {
 
     public Controle() {
         canalAtual = "#geral";
-        registrarComandos();
-    }
-
-    public void registrarComandos() {
-        Comando.comandos.put("/localizacao", new Geolocalizacao());
-        Comando.comandos.put("/telefones", new Telefones());
-        Comando.comandos.put("/gif", new Gifs());
     }
 
     public boolean validarConexao(String nome, String ip, String porta) {
@@ -87,7 +77,8 @@ public class Controle {
     }
 
     public void executarComando(String comando) {
-        enviarMensagem(Comando.executarComando(comando));
+        ComandosChat cmd = new ComandosChat();
+        enviarMensagem(cmd.executarComando(comando));
     }
 
     public void mostrarMensagem(Mensagem msg) {
@@ -125,14 +116,14 @@ public class Controle {
     public void receberNovoTopico(Topico topico) {
         String hashtag = topico.getHashtag();
         todosTopicos.put(hashtag, topico);
-        
+
         // Salva imagem do tópico
         if (topico.getFoto() != null) {
             Arquivo arquivo = new Arquivo();
             String caminhoFoto = arquivo.salvarArquivo(topico.getFoto(), topico.getExtensaoFoto());
             topico.setCaminhoFoto(caminhoFoto);
         }
-        
+
         // Checa se o tópico foi recebido pelo servidor antes do formulário carregar
         // e armazena para mostrar quando carregar.
         if (frmC == null) {
@@ -145,15 +136,6 @@ public class Controle {
     public void sincronizarTopicos() {
         for (Topico topico : topicosPendentes) {
             frmC.adicionarNovoTopico(topico.getHashtag());
-        }
-    }
-
-    public void excluirTopico(String hashtag) {
-        Topico removido = todosTopicos.remove(hashtag);
-        if (removido != null) {
-            // Informa o servidor
-        } else {
-            this.mensagem = "Erro ao apagar o tópico";
         }
     }
 

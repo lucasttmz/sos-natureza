@@ -44,7 +44,7 @@ public class Arquivo {
         File arquivo = new File(caminhoArquivo);
         return arquivo.getName().split("\\.")[1];
     }
-    
+
     public byte[] converterParaBytes(String caminho) {
         byte[] bytes = null;
         try {

@@ -1,4 +1,4 @@
-package Comandos;
+package modelo.comandos;
 
 import java.io.IOException;
 import java.net.URI;
@@ -6,8 +6,6 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-
-import modelo.Comando;
 
 public class Geolocalizacao implements Comando {
 
@@ -40,8 +38,8 @@ public class Geolocalizacao implements Comando {
     private String extrairDados(String dados) {
         String[] linhas = dados.split("\\n");
         String link = "https://www.google.com/maps/place/" + String.valueOf(linhas[0]) + "," + String.valueOf(linhas[1]);
-        
-        return "<a href='"+ link +"'>"+ link +"</a>";
+
+        return "<a href='" + link + "'>" + link + "</a>";
     }
-    
+
 }
